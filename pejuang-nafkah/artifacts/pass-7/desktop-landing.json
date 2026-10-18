@@ -1,0 +1,48 @@
+{
+  "url": "http://127.0.0.1:5188",
+  "mode": "desktop",
+  "state": "landing",
+  "requestedState": "landing",
+  "appliedState": "landing",
+  "runId": "pass-7",
+  "seed": null,
+  "screenshotPath": "artifacts\\pass-7\\desktop-landing.png",
+  "gpu": {
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x0000A7A0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (Intel)",
+    "softwareRendered": false
+  },
+  "result": {
+    "ok": true,
+    "reason": "nonblank",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 1280,
+      "height": 720
+    },
+    "drawingBuffer": {
+      "width": 1280,
+      "height": 720
+    },
+    "alphaPixels": 4096,
+    "variance": 251,
+    "colorBuckets": 155,
+    "metrics": {
+      "colorBuckets": 209,
+      "colorEntropyBits": 4.59,
+      "edgeDensity": 0.228,
+      "luminance": {
+        "mean": 51.6,
+        "p5": 18.2,
+        "p95": 134.6,
+        "contrast": 116.4
+      },
+      "dominantColorShare": 0.25,
+      "nonBackgroundShare": 0.75
+    },
+    "renderBudget": null
+  },
+  "consoleErrors": [],
+  "pageErrors": []
+}

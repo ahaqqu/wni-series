@@ -1,0 +1,48 @@
+{
+  "url": "http://127.0.0.1:5188",
+  "mode": "mobile",
+  "state": "active-play",
+  "requestedState": "active-play",
+  "appliedState": "active-play",
+  "runId": "pass-3",
+  "seed": null,
+  "screenshotPath": "artifacts\\pass-3\\mobile-active-play.png",
+  "gpu": {
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x0000A7A0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "Google Inc. (Intel)",
+    "softwareRendered": false
+  },
+  "result": {
+    "ok": true,
+    "reason": "nonblank",
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 664
+    },
+    "drawingBuffer": {
+      "width": 780,
+      "height": 1328
+    },
+    "alphaPixels": 4097,
+    "variance": 254,
+    "colorBuckets": 161,
+    "metrics": {
+      "colorBuckets": 225,
+      "colorEntropyBits": 4.26,
+      "edgeDensity": 0.246,
+      "luminance": {
+        "mean": 44.7,
+        "p5": 0.2,
+        "p95": 169.2,
+        "contrast": 169
+      },
+      "dominantColorShare": 0.413,
+      "nonBackgroundShare": 0.587
+    },
+    "renderBudget": null
+  },
+  "consoleErrors": [],
+  "pageErrors": []
+}
