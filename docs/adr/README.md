@@ -27,6 +27,8 @@ Research-first requirements and templates: [research protocol](../games/pejuang-
 | [0004](0004-live-data-providers.md)  | TomTom + BMKG, modelled crowding                       | Accepted          | 2026-10-19 |
 | [0005](0005-drama-system.md)         | Rare, real-basis, fictionalised drama layer            | Accepted          | 2026-10-19 |
 | [0006](0006-daily-drama-pipeline.md) | Daily AI research with human approval, no auto-publish | Accepted (design) | 2026-10-19 |
+| [0007](0007-caching-and-edge-delivery.md) | Postgres-only caching; Cloudflare edge for static/JSON | Accepted          | 2026-10-19 |
+| [0008](0008-social-signal-ingestion.md) | Social signal ingestion via a scraping broker (candidate) | **Proposed**    | 2026-10-19 |
 
 Existing architecture summary: [architecture.md](../games/pejuang-nafkah/architecture.md) §3.
 

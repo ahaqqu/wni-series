@@ -15,6 +15,9 @@
 - [Daily drama research plan](research/2026-10-daily-drama-pipeline.md) — source/ToS, AI terms, legal/privacy, approval dry run, cost; **not run**.
 - [Daily drama runbook](../../runbooks/daily-drama.md) — review checklist, publish, rollback/correction, failure, kill switches.
 - [Drama research/source-bank plan](research/2026-10-drama-system.md) — draft; no approved cards yet.
+- [ADR-0007](../../adr/0007-caching-and-edge-delivery.md) — Postgres-only caching; Cloudflare edge for static + immutable content JSON; Valkey deferred behind explicit tripwires.
+- [Caching/edge research brief](research/2026-10-caching-edge-delivery.md) — Cloudflare cache behavior and R2 pricing verified 2026-10-19; load model is an estimate, not a benchmark.
+- [ADR-0008](../../adr/0008-social-signal-ingestion.md) — **proposed only**: social signal ingestion via a scraping broker (treg candidate). Does not change ADR-0006 or the no-scraping rule; deep research + 5-day trial required before acceptance.
 - [research/PROTOCOL.md](research/PROTOCOL.md) — mandatory research-first gate; [ADR index](../../adr/README.md) with ADR-0001.
 - [Phase 1 research pre-flight plan](research/2026-10-phase-1-research-plan.md) — draft; no Phase 1 implementation until the gate is green.
 - [plan.md](plan.md) — phases 0–8, gates, evidence, risks, launch checklist.
@@ -39,6 +42,7 @@
 | Daily drama  | 00:00 WIB AI research/draft; owner approves every card + pack; no auto-publish; anonymous; signed; fallback; Phase 2D |
 | Mayar        | Personal merchant; sandbox until KYC; invoice/payment request + SaaS membership                                       |
 | Host         | `wniseries.ahaqqu.com`, netcup 2 vCPU/4 GB/100+ GB, Cloudflare edge                                                   |
+| Caching      | Postgres only; Cloudflare edge for static + versioned content JSON; no Valkey until a measured tripwire (ADR-0007)     |
 | Stack        | Astro + Vite/Three.js + Fastify + Postgres + Better Auth + Drizzle                                                    |
 | Controls     | One-hand, portrait-first, offline-tolerant                                                                            |
 | Content      | Versioned packs with `effective_from`                                                                                 |
@@ -87,6 +91,7 @@
 - No playable build, no checkout/auth, no live-data implementation, no live deployment.
 - No public KRL/TransJakarta live crowding/position API; Phase 2 must label crowding as estimate unless a partnership is signed.
 - Daily drama is design-only: no source/ToS, AI provider, legal/privacy review, approval UI, dry run, or cost model. No auto-publish path exists; nothing is scheduled.
+- Social sourcing is **proposed, not decided** (ADR-0008): scraping brokers carry ToS/indemnity/copyright/PDP exposure that no vendor absorbs; Indonesian coverage, Threads search, reliability, and legal sign-off are unproven.
 - Drama bank is not built: no source log, no approved cards, no sensitivity review, no frequency test. Content lock is blocked until those exist (ADR-0005).
 - Share card is design-only; no upload/feed/UGC. The HTML mock on the landing page is labelled as a target, not a feature.
 - TomTom/PetaBencana commercial terms and budgets still need written confirmation.
@@ -107,6 +112,7 @@
 | 2026-10-19 | 0     | Research-first protocol + ADR-0001; `docs/games/pejuang-nafkah/research/PROTOCOL.md`, `docs/adr/`                                                                        |
 | 2026-10-19 | 0.5   | v4.2 drama/slogan update + landing drama section: `artifacts/verification/landing/2026-10-19/drama-report.md`                                                            |
 | 2026-10-19 | 0     | v4.3 daily drama pipeline: `docs/adr/0006-daily-drama-pipeline.md`, `docs/games/pejuang-nafkah/research/2026-10-daily-drama-pipeline.md`, `docs/runbooks/daily-drama.md` |
+| 2026-10-19 | 0     | Caching/edge decision: `docs/adr/0007-caching-and-edge-delivery.md`, `docs/games/pejuang-nafkah/research/2026-10-caching-edge-delivery.md`; Cloudflare/R2 docs verified 2026-10-19; **no load test yet** |
 
 ## 7. Design/plan review — v2 → v3
 

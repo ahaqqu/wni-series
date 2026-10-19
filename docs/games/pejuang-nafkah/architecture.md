@@ -92,6 +92,7 @@ flowchart LR
 | ADR-10 | **Versioned content packs with `effective_from`**                   | Hard-coded data                       | Real-world schedules/fares/stations change                                                    |
 | ADR-11 | **Free one route; All Maps Rp 79k once; Live Rp 49k/month; no ads** | Ads; one-time only; pure subscription | Free route is a real game; All Maps funds content; Live funds data and utility                |
 | ADR-12 | **Cloudflare Tunnel** (recommended)                                 | Open 443 + origin cert                | Hides origin, no inbound ports, simple TLS; WAF/Access still apply                            |
+| ADR-13 | **Postgres-only caching; Cloudflare edge for static + immutable JSON** | Valkey/Redis now; Cache Everything on `/api/*` | PK reads are cheap; bytes are the bottleneck; edge-cached auth data leaks across users ([ADR-0007](../../adr/0007-caching-and-edge-delivery.md)) |
 
 ### 3.1 Research inputs, ADR discipline, and scaling evidence
 
@@ -190,6 +191,25 @@ wni-series/
 | `/admin*`        | Caddy → platform static + `/api/admin` | Admin UI                 | Cloudflare Access required                 |
 | `/assets/*`      | Caddy → `current/assets` or R2 signed  | Public/paid assets       | Public immutable; paid signed short TTL    |
 
+**Edge cache matrix ([ADR-0007](../../adr/0007-caching-and-edge-delivery.md)).** Cloudflare caches by file extension, not MIME type; HTML and JSON are **not** cached by default.
+
+| Content                        | Origin                    | Response header                          | Edge rule                                    | Invalidation               |
+| ------------------------------ | ------------------------- | ---------------------------------------- | -------------------------------------------- | -------------------------- |
+| Hashed JS/CSS/textures/audio   | Caddy `current/play`      | `public, max-age=31536000, immutable`    | default (extension)                          | none — filename changes    |
+| Platform HTML                  | Caddy `current/platform`  | `public, max-age=60, s-maxage=300`       | edge TTL from `s-maxage`; purge on deploy    | purge on deploy            |
+| Content packs `/content/v1/*`  | Caddy `current/content`   | `public, max-age=31536000, immutable`    | **Cache Rule: Eligible for cache = Yes**     | none — version in path     |
+| `/assets/*` public             | Caddy or R2               | `public, max-age=31536000, immutable`    | default (extension)                          | none                       |
+| Paid packs                     | R2 signed URL             | `private, no-store`                      | bypass                                       | n/a                        |
+| `/api/*`                       | Fastify                   | `no-store`                               | never matched by a rule                      | n/a                        |
+| Live briefing                  | Fastify                   | `private, max-age=60`                    | bypass                                       | n/a                        |
+
+- Never apply "Cache Everything" to `/api/*`: authenticated JSON cached at the edge can be served to another user. The CDN is not an authorization boundary (ADR-0002).
+- Always send an explicit `Cache-Control` for HTML. Without one, Cloudflare's default edge TTL for a `200` is 120 minutes, which is longer than a deploy cycle.
+- Keep the cache key to path (+ version). No query strings on content URLs; no `Vary` on attacker-controlled headers.
+- Enable Tiered Cache (Free plan: Smart topology) so misses collapse at an upper tier, and Cache Deception Armor.
+- Content is versioned, so it never needs purging; only HTML is purged, by the deploy workflow.
+- Verify with `cf-cache-status` after the first staging deploy.
+
 **Cloudflare Tunnel (recommended):**
 
 ```text
@@ -220,6 +240,14 @@ Internet → Cloudflare (DNS/WAF/cache/Access)
     file_server
   }
 
+  # Versioned content packs: immutable, no purge. Cloudflare does not cache
+  # JSON by default, so /content/* needs a Cache Rule (Eligible for cache = Yes).
+  handle /content/* {
+    root * /srv/wni/current/content
+    file_server
+    header Cache-Control "public, max-age=31536000, immutable"
+  }
+
   # Hashed assets immutable; HTML must revalidate.
   @game_html path /play/*/ /play/*/index.html
   header @game_html Cache-Control "no-cache"
@@ -236,6 +264,9 @@ Internet → Cloudflare (DNS/WAF/cache/Access)
     root * /srv/wni/current/platform
     try_files {path} {path}/ /404.html
     file_server
+    # Explicit HTML TTL; Cloudflare otherwise applies a 120-minute default to 200s.
+    @platform_html path / *.html
+    header @platform_html Cache-Control "public, max-age=60, s-maxage=300"
   }
 
   header {
@@ -886,7 +917,7 @@ provider_calls]
 ```
 
 - `services/api` module `live` or a small `services/live` worker; same Postgres. Start as an in-process scheduled job with advisory lock; split later only if load demands.
-- `live_snapshots` keyed by corridor, mode, source set, `as_of`; TTL 15–35 min. Latest row + in-memory cache; no Redis required at current scale.
+- `live_snapshots` keyed by corridor, mode, source set, `as_of`; TTL 15–35 min. Latest row + in-process TTL LRU. **No Valkey/Redis** ([ADR-0007](../../adr/0007-caching-and-edge-delivery.md)): the serving path is one primary-key read, and a cached entitlement is an authorization decision with a TTL. Add a shared cache only when an ADR-0007 tripwire fires (second API instance, sustained Postgres CPU > 60%, p95 DB > 50 ms, > 100 req/s, queue/pub-sub need).
 - `provider_budgets` row per month/provider; worker checks before each call; if over, stop fetching and serve stale.
 - `provider_calls` records status/latency/estimated cost for the admin dashboard.
 
@@ -1246,7 +1277,7 @@ Scaling claims must be measured, not asserted:
 - Inject failures: provider 429/5xx, DB failover/restore, webhook replay, stale cache, tunnel loss.
 - Keep the benchmark command, commit, device/network, and raw JSON in `artifacts/research/<phase>/<date>/`.
 
-Do not add Redis/queues/Kubernetes until the measured bottleneck justifies the operational cost.
+Do not add Redis/queues/Kubernetes until the measured bottleneck justifies the operational cost. The caching tripwires and the escalation order (index → pool → vertical → replica → shared cache) are in [ADR-0007](../../adr/0007-caching-and-edge-delivery.md).
 
 ## 14. Deployment and operations
 
