@@ -22,7 +22,7 @@ await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
   .series { display: inline-block; margin-top: 18px; padding: 6px 10px; color: #06111b; background: #f7e45a; font-size: 13px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; transform: rotate(-1.2deg); border: 1px solid rgba(6,17,27,.5); box-shadow: 3px 3px 0 rgba(0,0,0,.3); }
   h1 { margin: 18px 0 0; font-size: 82px; line-height: .8; letter-spacing: -.065em; font-weight: 900; max-width: 680px; text-shadow: 0 10px 50px rgba(0,0,0,.3); }
   h1 em { color: #ffb347; font-style: normal; }
-  h1 .besok { display: inline-block; margin-top: 10px; padding: 1px 9px 3px; color: #06111b; background: #ff5a4e; font-size: 34px; line-height: 1; letter-spacing: -.02em; transform: rotate(-1.5deg); border: 1px solid rgba(6,17,27,.5); }
+  h1 .besok { display: inline-block; margin-top: 10px; padding: 1px 9px 3px; color: #06111b; background: #ff5a4e; font-size: 28px; line-height: 1; letter-spacing: -.02em; transform: rotate(-1.5deg); border: 1px solid rgba(6,17,27,.5); }
   .lede { max-width: 570px; color: rgba(244,235,221,.78); font-size: 19px; line-height: 1.45; margin-top: 18px; }
   .bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
   .badge { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: rgba(244,235,221,.5); border: 1px solid rgba(244,235,221,.24); padding: 9px 12px; border-radius: 999px; }
@@ -36,9 +36,9 @@ await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
   <div class="content">
     <div>
       <div class="kicker"><span></span>WNI SERIES #1 · PRE-ALPHA</div>
-      <div class="series">Susahnya nyata. Lucunya gratis.</div>
-      <h1>BERANGKAT.<br>BERJUANG.<br><em>SAMPAI.</em><br><span class="besok">BESOK LAGI.</span></h1>
-      <p class="lede">Game satu tangan tentang perjalanan pagi di Jabodetabek.<br>Motor, KRL, atau keduanya — dari Bintaro sampai Sudirman.</p>
+      <div class="series">Susahnya nyata, dramanya gratis.</div>
+      <h1>BERANGKAT.<br>BERJUANG.<br><em>SAMPAI.</em><br><span class="besok">GITU AJA TERUS SETIAP HARI.</span></h1>
+      <p class="lede">Game satu tangan tentang perjalanan pagi di Jabodetabek.<br>Motor, KRL, atau keduanya — dari Bintaro sampai Sudirman.<br>Kadang ada drama. Tetap sampai.</p>
     </div>
     <div class="bottom">
       <div class="brand">Pejuang Nafkah<small>WNI SERIES · JAKARTA</small></div>

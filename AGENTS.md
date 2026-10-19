@@ -54,7 +54,9 @@ If two documents conflict, stop and ask. If code conflicts with a MUST, the doc 
 - **Real place names, original branding.** No official KAI/TransJakarta/JR logos, trade dress, or copied announcements.
 - **Data has a date.** Fares/stations/schedules are versioned content, never hard-coded.
 - **Privacy by design.** No NIK, phone, address, precise location, contacts, ad IDs, or ad trackers.
-- **Tone:** dry, warm, self-deprecating; never misery porn or punching down. Series line: **“Susahnya nyata. Lucunya gratis.”** Game line: **“Berangkat. Berjuang. Sampai. Besok lagi.”** Follow `brand.md`; joke at the situation/system/self, not at victims.
+- **Tone:** dry, warm, self-deprecating; never misery porn or punching down. Series line: **“Susahnya nyata, dramanya gratis.”** Game line: **“Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.”** Follow `brand.md`; joke at the situation/system/self, not at victims.
+- **Drama is core, rare, real-basis, fair.** Major drama is not every run; every card needs `realBasis`, ≥2 sources, a `fictionalised` note, and sensitivity review. No real recent tragedy, victims, graphic injury, or identity blame. Drama is never paid or gacha. See [ADR-0005](docs/adr/0005-drama-system.md).
+- **Sharing is local and private.** Share cards use fixed fields + corridor-level location only; no upload, no public feed/UGC, no precise home/work pin, no PII.
 - **Performance:** 60 fps target / 30 fps floor; 60 fps marketing motion with reduced-motion fallback.
 - **Live data honesty:** traffic/weather/incidents may be labelled Live; crowding/transit delay are estimated unless an operator feeds them. Never fake live data; freeze a snapshot for each scored run.
 - **Landing honesty:** the site must say pre-alpha, show what exists, and never imply the game is playable or payments are live.
@@ -132,6 +134,7 @@ Today: docs/scaffold, `@wni/platform` build/check, and `@wni/api` build/test exi
 ## 9. Content standards
 
 - Every route/station/rule has `sourceIds`, `retrievedAt`, `confidence`, `effectiveFrom`.
+- Every drama card has `realBasis`, ≥2 `sourceIds`, `fictionalised`, `sensitivity`, rarity/conditions/choices, and a share headline; no source or sensitivity review, no card.
 - Station order, door side, fares, and odd-even hours must be verified against current sources before content lock.
 - No real recent tragedy, no real victims, no official logos, no copied PA audio.
 - Native Indonesian review for player-facing copy; English translation for UI.

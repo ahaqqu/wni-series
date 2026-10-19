@@ -48,8 +48,36 @@ results.desktop = await desktop.evaluate(() => ({
   clientWidth: document.documentElement.clientWidth,
   title: document.title,
   sections: document.querySelectorAll('section').length,
+  heroPunch: (() => {
+    const el = document.querySelector('.hero-punch');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { text: el.textContent?.trim(), left: r.left, right: r.right, width: r.width };
+  })(),
 }));
 await desktop.screenshot({ path: `${outDir}/desktop-hero.png` });
+await desktop.evaluate(() => {
+  document.documentElement.style.scrollBehavior = 'auto';
+  document.querySelector('#drama')?.scrollIntoView();
+});
+await desktop.waitForTimeout(1200);
+results.desktopDrama = await desktop.evaluate(() => ({
+  cards: document.querySelectorAll('.drama-card').length,
+  share: document.querySelectorAll('.drama-share-card').length,
+}));
+await desktop.screenshot({ path: `${outDir}/desktop-drama.png` });
+await desktop.evaluate(() => {
+  document.documentElement.style.scrollBehavior = 'auto';
+  document.querySelector('.drama-share')?.scrollIntoView({ block: 'center' });
+});
+await desktop.waitForTimeout(900);
+results.desktopDramaShare = await desktop.evaluate(() => {
+  const el = document.querySelector('.drama-share-card');
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { left: r.left, right: r.right, width: r.width, height: r.height };
+});
+await desktop.screenshot({ path: `${outDir}/desktop-drama-share.png` });
 
 const mobile = await open(
   { width: 390, height: 844 },
@@ -62,9 +90,30 @@ results.mobile = await mobile.evaluate(() => ({
   clientWidth: document.documentElement.clientWidth,
 }));
 await mobile.screenshot({ path: `${outDir}/mobile-hero.png` });
-await mobile.evaluate(() => document.querySelector('#rute')?.scrollIntoView());
+await mobile.evaluate(() => {
+  document.documentElement.style.scrollBehavior = 'auto';
+  document.querySelector('#rute')?.scrollIntoView();
+});
 await mobile.waitForTimeout(900);
 await mobile.screenshot({ path: `${outDir}/mobile-route.png` });
+await mobile.evaluate(() => {
+  document.documentElement.style.scrollBehavior = 'auto';
+  document.querySelector('#drama')?.scrollIntoView();
+});
+await mobile.waitForTimeout(1200);
+results.mobileDrama = await mobile.evaluate(() => ({
+  cards: document.querySelectorAll('.drama-card').length,
+  scrollWidth: document.documentElement.scrollWidth,
+  clientWidth: document.documentElement.clientWidth,
+  shareRight: document.querySelector('.drama-share-card')?.getBoundingClientRect().right ?? null,
+}));
+await mobile.screenshot({ path: `${outDir}/mobile-drama.png` });
+await mobile.evaluate(() => {
+  document.documentElement.style.scrollBehavior = 'auto';
+  document.querySelector('.drama-share')?.scrollIntoView({ block: 'center' });
+});
+await mobile.waitForTimeout(900);
+await mobile.screenshot({ path: `${outDir}/mobile-drama-share.png` });
 
 results.errors = errors;
 results.url = url;

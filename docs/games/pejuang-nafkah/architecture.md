@@ -1,7 +1,7 @@
 # architecture.md — WNI Series platform + Pejuang Nafkah
 
 **System architecture, security, privacy, deployment, and verification**
-**Version:** 4.1
+**Version:** 4.2
 **Date:** 2026-10-19
 **Status:** target architecture — game/checkout implementation not started; landing page + waitlist implemented; Mayar/live-data design added
 **Host:** `https://wniseries.ahaqqu.com` — netcup VPS (2 vCPU / 4 GB / 100+ GB SSD) + Cloudflare edge.
@@ -379,6 +379,88 @@ Deploy is atomic: build → upload to `releases/<sha>` → run migrations → `l
 - **Offline/PWA:** Workbox service worker; app shell + free content cached; paid content cached after entitlement sync with 7-day signed token; no API response caching with PII.
 - **Telemetry:** batched, sampled, no PII; send on `visibilitychange`/interval; drop on failure.
 - **No third-party scripts** in the game shell except optional privacy analytics; CSP-strict.
+
+### 6.2a Drama content and local share pipeline
+
+Drama is a data-driven content layer with a deterministic selector and a client-side share renderer. It adds no API dependency to a scored run.
+
+**Content layout**
+
+```text
+data/
+├── raw/sources/drama/          # source captures/notes (not redistributed)
+└── normalized/
+    └── drama/<version>/
+        ├── manifest.json       # families, rarity weights, kill list, effectiveFrom
+        ├── cards.json          # drama/kejadian cards
+        └── sources.json        # source registry: id, url, retrievedAt, licence
+```
+
+**Schema (in `packages/content-schema`)**
+
+```ts
+type DramaCard = {
+  id: string;
+  family:
+    | 'flood'
+    | 'demo'
+    | 'minor-accident'
+    | 'crowd-conflict'
+    | 'transit-failure'
+    | 'infrastructure'
+    | 'city-event';
+  rarity: 'kejadian' | 'drama' | 'rare';
+  realBasis: string;
+  sourceIds: string[]; // >= 2, must resolve in sources.json
+  retrievedAt: string; // ISO date of the latest source check
+  confidence: 'high' | 'medium' | 'low';
+  fictionalised: string; // what is composite/invented
+  sensitivity: 'low' | 'medium' | 'high';
+  conditions: { weather?: string[]; time?: string[]; routeIds?: string[]; season?: string[] };
+  telegraph: string;
+  choices: DramaChoice[]; // >= 2, each with costs/effects and at least one viable exit
+  bangLines: string[];
+  shareHeadline: string;
+  contentWarning?: string;
+};
+```
+
+**Selection**
+
+- `sim/drama/select.ts` is pure: `selectDrama(runSeed, contentVersion, route, mode, departure, weather)`.
+- It uses the shared deterministic PRNG, not `Math.random`; it returns at most one major card and 0–3 kejadian.
+- The selected card IDs are part of the run state and replay hash; no server call, no mid-run mutation.
+- Rarity weights live in the content manifest, not code, so tuning is a content release.
+- The source bank is validated in CI: every `sourceIds` entry exists; ≥2 sources; no excluded family; no duplicate IDs; choices have an exit.
+
+**Share pipeline**
+
+- After arrival, `render/share.ts` draws a 1:1 or 9:16 card on `OffscreenCanvas` (fallback: DOM → `canvas`), off the game render loop.
+- Uses Web Share API with a `File` when supported; otherwise download PNG and copy text.
+- No upload endpoint in v1. No account required. No public feed.
+- Card fields: corridor names (not precise home/work), drama type/headline, grade, Bang line, “Gitu aja terus setiap hari.”, optional watermark.
+- Excludes: player name (unless the player opts in locally), exact pins, times that identify a home, provider data, photos.
+- Performance: target ≤150 ms on a mid-range phone; if exceeded or canvas fails, fall back to a text share sheet. No layout thrash or blocking of arrival animation.
+- If link sharing is added later: opaque share ID, 30-day expiry, no PII, moderation/abuse controls, and a new ADR.
+
+**Failure and operations**
+
+- `FEATURE_DRAMA=false` (content flag) disables drama selection without breaking a run; the report card uses the normal story line.
+- A card can be disabled by ID via the content kill list without a code deploy; old runs keep their content version.
+- Analytics: `drama_selected` (card id, rarity), `drama_choice`, `share_opened`, `share_completed`; no free text, no location, no PII.
+- A takedown/correction note is stored with the content version and surfaced in the changelog.
+
+**Threats**
+
+| Threat                      | Control                                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| Defamation/real-victim harm | Real-basis ledger, 12-month exclusion, no names/likeness, sensitivity review, kill switch |
+| Fake “live drama” claim     | Drama is fictionalised and labelled as in-game; no news feed; no live badge on a card     |
+| Share-card PII leak         | Fixed fields, corridor-level only, preview before share, no upload                        |
+| Content injection           | Signed content pack/checksum; schema validation; no remote HTML                           |
+| Determinism break           | Seeded selector, frozen card IDs, replay hash, CI golden seeds                            |
+
+---
 
 ### 6.3 API (`services/api`, Fastify + TypeScript)
 
@@ -1160,7 +1242,7 @@ SLOs:
 - **API:** integration with real Postgres; Mayar mock + sandbox; auth flows; authz matrix; webhook fuzz/replay; one-time/subscription lifecycle; live snapshot contract/cost.
 - **Game client:** Playwright with WebGL; input scripts; screenshots; FPS probe; offline mode; resize/orientation.
 - **Platform:** Playwright for auth/account/checkout; axe; Lighthouse; link checker.
-- **Content:** schema + station order/fare/door side/attribution assertions.
+- **Content:** schema + station order/fare/door side/attribution assertions + drama source/rarity/fairness assertions.
 - **Security:** gitleaks, `pnpm audit`, ZAP baseline, custom authz tests; pen test Phase 5.
 - **Ops:** deploy/rollback/restore drills; staging smoke.
 
@@ -1171,6 +1253,7 @@ SLOs:
 - Input trace: `{t, action, value}`; replay in Node; compare final state hash/score.
 - Content version pinned; RNG version pinned.
 - Server validates: duration bounds, score bounds, token unused, content version, route/mode; top 100 replay.
+- Drama selection is replayed from the seed + content version; the expected card IDs are compared with the client trace.
 
 ### 16.3 Evidence and agent protocol
 

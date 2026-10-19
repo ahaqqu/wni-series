@@ -1,7 +1,7 @@
 # specs.md — Pejuang Nafkah (WNI Series #1)
 
 **Product specification and quality contract**
-**Version:** 4.1
+**Version:** 4.2
 **Date:** 2026-10-19
 **Status:** design baseline — game/checkout implementation not started; pre-alpha landing page + waitlist implemented
 **Owner:** WNI Series
@@ -28,7 +28,7 @@
 
 > **A game that feels like your actual commute — not a race, not a tycoon, not a meme.**
 >
-> You leave home in Jabodetabek before dawn. You choose the motorcycle, the KRL, or both. You deal with the same roads, stations, rules, crowds, weather, costs, and small human moments. You arrive at the office — tired, amused, relieved, sometimes late. Then you do it again tomorrow.
+> You leave home in Jabodetabek before dawn. You choose the motorcycle, the KRL, or both. You deal with the same roads, stations, rules, crowds, weather, costs, and small human moments. You arrive at the office — tired, amused, relieved, sometimes late. Some mornings the city throws a drama: a flood, a demo, a small accident, a queue fight. You meet it with a joke and a shrug, find a way through, and retell it tomorrow. Then you do it again.
 
 **One-line pitch:** _The one-hand commute game set on the real streets and trains of Jakarta, where getting to work is the adventure._
 
@@ -65,6 +65,7 @@ At the same time, the commute is full of stories: the angkot that stops anywhere
 | Speed / cargo / tycoon       | **Time, money, body, dignity, social pressure**       |
 | Two-hand, landscape, at home | **One-hand, portrait, on the move**                   |
 | Ads or gacha                 | **Free route + All Maps + optional Live + cosmetics** |
+| Scripted one-off set pieces  | **Rare, real-basis drama that changes the story**     |
 | Generic city                 | **Jakarta/Jabodetabek specificity**                   |
 
 ---
@@ -115,6 +116,7 @@ At the same time, the commute is full of stories: the angkot that stops anywhere
 | I am standing on the KRL        | play something meaningful for 5 minutes with one thumb | turn dead time into “me” time             |
 | I am stuck in traffic           | laugh at the absurdity and feel competent              | release tension without doomscrolling     |
 | I get to the office late        | tell the story of my morning                           | feel seen, not judged                     |
+| Something absurd happens        | retell it and make someone laugh                       | turn a bad morning into a shared story    |
 | I have a free evening           | make progress, unlock a route, beat my best            | have a reason to return                   |
 | I want to support the developer | pay once, transparently                                | enjoy the full game without ads or tricks |
 
@@ -138,9 +140,9 @@ The game MUST be fully playable in portrait with one thumb: no two-hand gestures
 
 Speed is a consequence of gaps, lights, crowds, and decisions. No nitro, no lap timer, no “beat the traffic” power fantasy. The score rewards arriving intact, on time, solvent, and with dignity — not being fastest.
 
-### P4. **Struggle without misery.**
+### P4. **Struggle and drama without misery.**
 
-The game shows heat, crowding, delays, and cost honestly. It never mocks commuters, romanticises suffering, or makes poverty the punchline. Every run ends with a way forward. Warmth and dry humour are mandatory: the joke is how the character survives the day, not a verdict on the people living it.
+The game shows heat, crowding, delays, cost, and the occasional real-basis drama honestly. It never mocks commuters, romanticises suffering, or makes poverty the punchline. Every run ends with a way forward. Warmth and dry humour are mandatory: the joke is how the character survives the day, not a verdict on the people living it.
 
 ### P5. **Free is a real game — you choose your commute.**
 
@@ -188,11 +190,24 @@ Live traffic, weather, and incidents come from named providers with a timestamp 
 
 ### P16. **Ketawa itu bertahan, bukan mengejek.**
 
-The brand line is **“Susahnya nyata. Lucunya gratis.”** The game’s line is **“Berangkat. Berjuang. Sampai. Besok lagi.”** Humour is dry, specific, self-deprecating, and aimed at the situation/system/ourselves — never at the poor, women, disabled people, minorities, or real victims. One joke per beat, then warmth. A serious failure gets silence or kindness, not a punchline. The player is never forced to laugh. Full voice/slogan system: [brand.md](brand.md).
+The brand line is **“Susahnya nyata, dramanya gratis.”** The game’s line is **“Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.”** Humour is dry, specific, self-deprecating, and aimed at the situation/system/ourselves — never at the poor, women, disabled people, minorities, or real victims. One joke per beat, then warmth. A serious failure gets silence or kindness, not a punchline. The player is never forced to laugh. Full voice/slogan system: [brand.md](brand.md).
 
 ### P17. **Research first, then simplify.**
 
 No detailed plan, estimate, dependency choice, architecture change, content lock, or implementation starts without a current research brief, an ADR for the choice, and evidence for the facts that could break it. Research covers latest supported technology, security/privacy, performance/load, cost caps, robustness/scaling, accurate real-world data, and how WNI commuters feel physically and emotionally. Unknowns are stop conditions. The protocol is [research/PROTOCOL.md](research/PROTOCOL.md); decisions live in [`docs/adr/`](../../adr/README.md).
+
+### P18. **Drama yang bikin cerita, bukan yang bikin sakit.**
+
+Drama is a core layer, not garnish. The game should make the player wonder “wah, ada drama apa hari ini?” — then give them a story worth retelling. Rules:
+
+- **Rare and irregular.** Major drama is not every run; small absurdities can be common. A run has at most one major drama. Rarity is tuned, not scheduled.
+- **Real basis, fictionalised detail.** Every drama family is documented as something that happened or still recurs in the city; the card is a composite. No invented geography, no fake news, no real recent tragedy, no real victims, no identity blame, no graphic injury.
+- **Fair.** Every drama is telegraphed, has at least two readable responses, and at least one viable way through. It can cost time, money, or dignity; it cannot make the run unwinnable.
+- **Bercanda dan santai.** The character meets it with a dry joke, then a practical move. The player is never forced to laugh, and a serious beat gets warmth or silence.
+- **Made to be shared.** The report card carries a “Cerita hari ini” headline; an on-device share card can be sent via Web Share or downloaded. No public feed, no UGC, no precise location, no PII.
+- **Never paid.** Drama is included in the free route and All Maps; no drama packs, gacha, or pay-to-win.
+
+Full decision: [ADR-0005](../../adr/0005-drama-system.md); source-bank plan: [drama research](research/2026-10-drama-system.md).
 
 ---
 
@@ -200,15 +215,16 @@ No detailed plan, estimate, dependency choice, architecture change, content lock
 
 ### 6.1 Experience objectives
 
-| ID  | Objective                           | Key result (v1)                                                                          |
-| --- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| X1  | The player recognises their commute | ≥80% of 12+ playtesters say “this feels like my commute” within one run                  |
-| X2  | One-hand play is real               | ≥90% of mobile playtesters complete the first run one-handed without instruction         |
-| X3  | The game is fun, not just sad       | ≥70% choose “fun/would play again”; median session 6–12 min                              |
-| X4  | Failure feels fair                  | ≥80% of failed runs say “I know what I’d do differently”                                 |
-| X5  | The tone lands                      | ≥70% say “warm/funny/respectful”; ≤10% say “miserable/mocking”                           |
-| X6  | Arrival feels good                  | ≥80% report relief/satisfaction at the arrival screen                                    |
-| X7  | Live is useful, not decorative      | ≥60% of Live beta users used the plan for a real trip; ≥70% can explain Live vs Estimasi |
+| ID  | Objective                           | Key result (v1)                                                                                      |
+| --- | ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| X1  | The player recognises their commute | ≥80% of 12+ playtesters say “this feels like my commute” within one run                              |
+| X2  | One-hand play is real               | ≥90% of mobile playtesters complete the first run one-handed without instruction                     |
+| X3  | The game is fun, not just sad       | ≥70% choose “fun/would play again”; median session 6–12 min                                          |
+| X4  | Failure feels fair                  | ≥80% of failed runs say “I know what I’d do differently”                                             |
+| X5  | The tone lands                      | ≥70% say “warm/funny/respectful”; ≤10% say “miserable/mocking”                                       |
+| X6  | Arrival feels good                  | ≥80% report relief/satisfaction at the arrival screen                                                |
+| X7  | Live is useful, not decorative      | ≥60% of Live beta users used the plan for a real trip; ≥70% can explain Live vs Estimasi             |
+| X8  | Drama is memorable and shareable    | ≥60% of playtesters retell a drama unprompted; ≥30% would share the card; ≤10% feel it mocks victims |
 
 ### 6.2 Product objectives
 
@@ -262,12 +278,14 @@ No detailed plan, estimate, dependency choice, architecture change, content lock
 - **Motor mode:** real arterial corridor, lane filtering, traffic lights, angkot stops, ojol, busway separators, pedestrians/PKL, rain/flood, police/razia as fictionalised events.
 - **Multimodal:** route planning, handoffs, time/cost/fatigue trade-offs.
 - **Systems:** clock, punctuality, money, body/mental fatigue, dignity, safety, score/report card, daily seed, leaderboards, save/sync, settings/accessibility.
+- **Drama:** a versioned drama bank (real basis + source IDs + sensitivity), rare/irregular selection, at most one major drama per run, two or more counterplays, “Cerita hari ini” headline, and an on-device share card with no PII.
 - **All Maps content (Rp 79,000 once):** every Pejuang Nafkah map, including the Jabodetabek launch set (Bintaro/Jurangmangu, BSD, Depok, Bekasi, Manggarai/Tanah Abang) and every map released in Phase 3 cities. It does not include Live data or future games.
 - **Live (Rp 49,000/month, Phase 2):** all maps + live traffic/incidents (TomTom), live weather/nowcast (BMKG), estimated crowding and transit delay with confidence labels, real-trip planner, and live snapshot briefing. It is not a navigation service and does not change a scored run mid-play.
 - **Platform web:** landing page, game page, route map, pricing, devlog, FAQ, legal pages, account, checkout, support.
 - **Auth:** Google + email OTP, guest trial, account linking, deletion/export.
 - **Payments:** Mayar sandbox → production; one-time All Maps, Live subscription, cosmetics; server-side entitlements, refund/revocation, reconciliation.
 - **PWA:** installable, offline-tolerant free/All Maps play, update flow; Live requires network for a fresh snapshot and degrades to the last cached snapshot with a stale label.
+- **Sharing:** local image/text share card at arrival, Web Share API + download/copy fallback; no public feed, no upload, no account required.
 - **Admin:** orders, refunds, entitlements, subscriptions, reconciliation, live-data cost/call dashboard, audit log, feature flags.
 - **Analytics:** privacy-first product funnel and game telemetry; no PII.
 
@@ -284,6 +302,8 @@ No detailed plan, estimate, dependency choice, architecture change, content lock
 - User-generated routes or mods.
 - Official KAI/TransJakarta branding, logos, or announcements.
 - AI-generated live dialogue (static authored content only for v1).
+- A public drama feed, real-news ingestion, UGC, or reconstructions of real recent tragedies.
+- Paid drama packs, drama gacha, or any drama content locked behind All Maps/Live.
 
 ### 7.3 Phase 3 candidates (not commitments)
 
@@ -310,7 +330,7 @@ No detailed plan, estimate, dependency choice, architecture change, content lock
 A **run** is one leg or one complete commute. It is composed of **beats**: a decision, a skill moment, a social moment, or a wait. A beat lasts 3–20 seconds; a leg lasts 5–15 minutes; a full multimodal commute lasts 10–20 minutes; a day can be completed in one or two sittings.
 
 **Micro loop (3–15 s):** read the situation → choose lane/gap/seat/brace → execute with one thumb → receive clear feedback (audio/visual/haptic) → adjust.
-**Meso loop (5–15 min):** manage time, money, body, mind, dignity → arrive → get a report card → retry or continue.
+**Meso loop (5–15 min):** manage time, money, body, mind, dignity → meet a kejadian or (rarely) a drama → choose a response → arrive → get a report card with a “Cerita hari ini” headline → share/retry/continue.
 **Macro loop (day/week):** plan departure, choose route, earn/spend, build relationships, unlock cosmetics, chase personal bests.
 **Meta loop (series):** new corridors, new games, shared account/entitlements.
 
@@ -343,7 +363,7 @@ A **run** is one leg or one complete commute. It is composed of **beats**: a dec
 
 ### 8.5 Win condition
 
-Arrive at the office before the grace cutoff with enough body/mind/dignity and money to function. “Win” is a **report card**, not a victory screen: punctuality, safety, calm, cost, dignity, and a one-line story of the day.
+Arrive at the office before the grace cutoff with enough body/mind/dignity and money to function. “Win” is a **report card**, not a victory screen: punctuality, safety, calm, cost, dignity, a one-line story of the day, and — when it happened — the drama you survived and can retell.
 
 ---
 
@@ -387,38 +407,42 @@ Priority: **M** = must for v1, **S** = should, **C** = could.
 
 ### 9.3 World and content
 
-| ID         | Requirement       | Priority | Acceptance                                                                |
-| ---------- | ----------------- | -------- | ------------------------------------------------------------------------- |
-| CONTENT-01 | Real route data   | M        | Named roads/stations; ordered stations; distances; source/date per record |
-| CONTENT-02 | Real rules        | M        | Fares, odd-even, busway, helmet, door side, speed ranges; effective dates |
-| CONTENT-03 | Real obstacles    | M        | ≥8 obstacle families; each telegraphed; each forces a decision            |
-| CONTENT-04 | Versioned content | M        | `contentVersion` + `effective_from`; game bootstrap pins version          |
-| CONTENT-05 | Attribution       | M        | OSM + public sources credited in game and site; licences recorded         |
-| CONTENT-06 | Refresh drill     | M        | Simulate Karet-style closure/Gapeka change without code release; test     |
-| CONTENT-07 | Fictional events  | M        | Flood/accident/police events are composites, not real recent tragedies    |
-| CONTENT-08 | Language          | M        | Indonesian primary; English secondary; all strings in i18n catalogs       |
+| ID         | Requirement       | Priority | Acceptance                                                                                                              |
+| ---------- | ----------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| CONTENT-01 | Real route data   | M        | Named roads/stations; ordered stations; distances; source/date per record                                               |
+| CONTENT-02 | Real rules        | M        | Fares, odd-even, busway, helmet, door side, speed ranges; effective dates                                               |
+| CONTENT-03 | Real obstacles    | M        | ≥8 obstacle families; each telegraphed; each forces a decision                                                          |
+| CONTENT-04 | Versioned content | M        | `contentVersion` + `effective_from`; game bootstrap pins version                                                        |
+| CONTENT-05 | Attribution       | M        | OSM + public sources credited in game and site; licences recorded                                                       |
+| CONTENT-06 | Refresh drill     | M        | Simulate Karet-style closure/Gapeka change without code release; test                                                   |
+| CONTENT-07 | Drama provenance  | M        | Every drama family has `realBasis` + ≥2 independent sources + date; cards are composites, not real recent tragedies     |
+| CONTENT-08 | Language          | M        | Indonesian primary; English secondary; all strings in i18n catalogs                                                     |
+| CONTENT-09 | Drama bank        | M        | ≥10 cards across ≥3 families; rarity, conditions, choices, effects, Bang lines, share headline; source IDs per card     |
+| CONTENT-10 | Drama fairness    | M        | At most one major drama/run; ≥2 counterplays; ≥1 viable out; no unavoidable loss; same drama not repeated within 5 runs |
+| CONTENT-11 | Drama sensitivity | M        | No real victim/recent tragedy/graphic injury/identity blame; native + sensitivity review recorded before content lock   |
 
 ### 9.4 Web platform
 
-| ID     | Requirement           | Priority | Acceptance                                                                          |
-| ------ | --------------------- | -------- | ----------------------------------------------------------------------------------- |
-| WEB-01 | Landing page          | M        | Hero, promise, modes, route proof, pricing, FAQ, CTA; mobile-first                  |
-| WEB-02 | Motion design         | M        | Scroll narrative + micro-interactions; reduced-motion fallback; 60 fps              |
-| WEB-03 | Game page             | M        | Screenshots, trailer/GIF, controls, authenticity, free/paid, CTA                    |
-| WEB-04 | Pricing               | M        | Free one-route vs All Maps Rp 79k vs Live Rp 49k/month; gross/tax note; refund link |
-| WEB-05 | Legal                 | M        | Terms, privacy, refund, contact, PSE/IGRS status, cookie notice                     |
-| WEB-06 | SEO                   | M        | Metadata, OG images, sitemap, structured data, hreflang, canonical                  |
-| WEB-07 | Performance           | M        | Lighthouse mobile ≥90 performance, LCP ≤2.0 s, INP ≤200 ms, CLS ≤0.05               |
-| WEB-08 | Analytics             | M        | Privacy-first, cookieless where possible; consent for non-essential                 |
-| WEB-09 | Support               | M        | `wniseries@gmail.com`, contact form, FAQ, response SLA, spam protection             |
-| WEB-10 | PWA                   | M        | Installable; offline game shell/free content; update prompt                         |
-| WEB-11 | Auth pages            | M        | Sign-in, account, purchases, delete/export; accessible                              |
-| WEB-12 | Checkout              | M        | Order summary, terms, Mayar redirect, return/poll, pending/failed states            |
-| WEB-13 | Browser compatibility | M        | Chrome/Edge/Firefox/Safari current-1; iOS 17+; Android 10+                          |
-| WEB-14 | WebView handling      | M        | Detect Instagram/TikTok/Facebook WebView; offer “open in browser”                   |
-| WEB-15 | Devlog                | S        | MDX/Content collections; RSS; share cards                                           |
-| WEB-16 | Subscription mgmt     | M        | Active plan, renewal date, cancel, payment issue, restore; no dark patterns         |
-| WEB-17 | Live labels           | M        | `Live` vs `Estimasi`; source + timestamp + confidence; stale state visible          |
+| ID     | Requirement           | Priority | Acceptance                                                                                  |
+| ------ | --------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| WEB-01 | Landing page          | M        | Hero, promise, modes, route proof, pricing, FAQ, CTA; mobile-first                          |
+| WEB-02 | Motion design         | M        | Scroll narrative + micro-interactions; reduced-motion fallback; 60 fps                      |
+| WEB-03 | Game page             | M        | Screenshots, trailer/GIF, controls, authenticity, free/paid, CTA                            |
+| WEB-04 | Pricing               | M        | Free one-route vs All Maps Rp 79k vs Live Rp 49k/month; gross/tax note; refund link         |
+| WEB-05 | Legal                 | M        | Terms, privacy, refund, contact, PSE/IGRS status, cookie notice                             |
+| WEB-06 | SEO                   | M        | Metadata, OG images, sitemap, structured data, hreflang, canonical                          |
+| WEB-07 | Performance           | M        | Lighthouse mobile ≥90 performance, LCP ≤2.0 s, INP ≤200 ms, CLS ≤0.05                       |
+| WEB-08 | Analytics             | M        | Privacy-first, cookieless where possible; consent for non-essential                         |
+| WEB-09 | Support               | M        | `wniseries@gmail.com`, contact form, FAQ, response SLA, spam protection                     |
+| WEB-10 | PWA                   | M        | Installable; offline game shell/free content; update prompt                                 |
+| WEB-11 | Auth pages            | M        | Sign-in, account, purchases, delete/export; accessible                                      |
+| WEB-12 | Checkout              | M        | Order summary, terms, Mayar redirect, return/poll, pending/failed states                    |
+| WEB-13 | Browser compatibility | M        | Chrome/Edge/Firefox/Safari current-1; iOS 17+; Android 10+                                  |
+| WEB-14 | WebView handling      | M        | Detect Instagram/TikTok/Facebook WebView; offer “open in browser”                           |
+| WEB-15 | Devlog                | S        | MDX/Content collections; RSS; share cards                                                   |
+| WEB-16 | Subscription mgmt     | M        | Active plan, renewal date, cancel, payment issue, restore; no dark patterns                 |
+| WEB-17 | Live labels           | M        | `Live` vs `Estimasi`; source + timestamp + confidence; stale state visible                  |
+| WEB-18 | Drama story           | M        | Landing explains the drama layer with real-basis/exclusion note; no fake “live drama” claim |
 
 ### 9.5 Payments and entitlements
 
@@ -490,6 +514,21 @@ Priority: **M** = must for v1, **S** = should, **C** = could.
 | OPS-04  | Observability              | M        | Sentry + uptime + payment alert + backup alert                                                                                     |
 | OPS-05  | Runbooks                   | M        | deploy, payment, backup/restore, incident, privacy request                                                                         |
 | OPS-06  | Status page/changelog      | S        | Public known issues + changelog                                                                                                    |
+
+### 9.8 Drama and sharing
+
+| ID       | Requirement    | Priority | Acceptance                                                                                                            |
+| -------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| DRAMA-01 | Real basis     | M        | Each card has `realBasis`, `sourceIds` (≥2), `retrievedAt`, `confidence`, `fictionalised` note; no source, no card    |
+| DRAMA-02 | Rarity         | M        | Major drama target ~1 in 5 runs (tunable), at most one per run; rare ~1 in 25; no pity timer; no repeat within 5 runs |
+| DRAMA-03 | Determinism    | M        | Selection at run start from seed + content version + route/time/weather; frozen for the run; replay reproduces it     |
+| DRAMA-04 | Fairness       | M        | ≥2 readable responses; ≥1 viable out; effects bounded; run remains completable; no QTE-only or hidden instant fail    |
+| DRAMA-05 | Tone           | M        | Bang Nafkah line + practical next move; serious beat can be silent; native review confirms no punch-down              |
+| DRAMA-06 | Share card     | M        | Local image/text, Web Share + download/copy fallback; ≤150 ms on mid-range (text fallback if slow); no upload/account |
+| DRAMA-07 | Privacy        | M        | Share card shows corridor/drama/grade only; no home/work pin, real name, photo, or provider data; no public feed/UGC  |
+| DRAMA-08 | Content safety | M        | Kill list enforced (recent tragedy, victims, mass casualty, communal blame, graphic injury); correction/takedown path |
+| DRAMA-09 | Free inclusion | M        | Drama available on the free route; no drama pack/gacha/paywall; Live changes conditions, not drama access             |
+| DRAMA-10 | Offline        | M        | Drama bank cached with content; selection/share works offline; no network dependency during a scored run              |
 
 ---
 
@@ -639,7 +678,8 @@ Every content pack MUST include:
 4. Rules table with fares, odd-even, busway, helmet, fines, door timing range.
 5. Obstacle/scenario table with weights, telegraphing, counterplay.
 6. Attribution/licence file (OSM ODbL, fonts, audio, voices).
-7. QA sheet with confidence and known gaps.
+7. Drama bank with `realBasis`, `sourceIds`, rarity, conditions, choices, effects, Bang lines, share headline, `fictionalised` note, and sensitivity review.
+8. QA sheet with confidence and known gaps.
 
 **Authenticity checklist (must pass for each corridor):**
 
@@ -725,7 +765,8 @@ A phase is not done unless:
 12. Monitoring/alerts live; support email monitored; response templates ready; provider-cost dashboard live.
 13. 12+ playtest recognition ≥80%; one-hand completion ≥90%; D1 proxy ≥30% in beta.
 14. No critical/high security findings; CSP enforced; secrets scanned.
-15. Launch checklist signed in `status.md`.
+15. Drama: source bank + sensitivity review current; rarity/fairness test passes; no real recent tragedy/victims; share card has no PII and works offline.
+16. Launch checklist signed in `status.md`.
 
 ---
 
@@ -740,3 +781,4 @@ A phase is not done unless:
 7. **Cities:** Phase 3 order/shortlist (Bandung, Surabaya, Yogyakarta candidates) and per-city data/licence/cost gate.
 8. **Support/identity:** KYC/legal business name, address, phone, and whether support moves from `wniseries@gmail.com` to a domain address.
 9. **Live cost policy:** 30-min polling below ~300 subs; 5-min peak above; hard monthly provider budget and kill-switch behaviour.
+10. **Drama policy:** exact rarity, family list, and share-card format after the Phase 1 source bank + sensitivity review; content lock blocked until then.

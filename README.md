@@ -6,8 +6,8 @@ First game: **Pejuang Nafkah** — a one-hand commute game set on the real roads
 > _“Oh — ini sama kayak perjalanan gue tiap pagi.”_
 
 **Status:** Phase 0 + pre-alpha landing page implemented; research-first gate adopted; Phase 1 brief/benchmark is the next gate; game, checkout, and live data not started.
-**WNI Series:** _Susahnya nyata. Lucunya gratis._
-**Pejuang Nafkah:** _Berangkat. Berjuang. Sampai. Besok lagi._
+**WNI Series:** _Susahnya nyata, dramanya gratis._
+**Pejuang Nafkah:** _Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari._
 **Host (target):** `https://wniseries.ahaqqu.com`
 **Support / privacy:** `wniseries@gmail.com`
 
@@ -23,18 +23,20 @@ No detailed plan or implementation starts without a current **research brief**, 
 
 ## What we are building
 
-Pejuang Nafkah is a 3D web game about getting to work in Greater Jakarta. You play the commute, not a race: motorcycle filtering, the KRL crush, real stations and roads, rain, angkot, ojol, odd-even, fares, fatigue, dignity, and the small human moments that make the day.
+Pejuang Nafkah is a 3D web game about getting to work in Greater Jakarta. You play the commute, not a race: motorcycle filtering, the KRL crush, real stations and roads, rain, angkot, ojol, odd-even, fares, fatigue, dignity, and the rare city drama that turns a morning into a story you retell.
 
 - **Dual mode:** motorcycle + KRL, plus multimodal handoffs.
 - **One hand, portrait, offline-tolerant:** designed to be played on the train you are actually riding.
 - **Free route choice:** pick the one route you actually commute; the complete game on that route, no ads.
 - **All Maps:** every Pejuang Nafkah map, including future Phase 3 cities — one-time, Rp 79,000.
+- **Drama, but rarely:** real-basis, fictionalised floods/demos/accidents/queue fights; rare enough to be a story, fair enough to retell, met with “bercanda dulu, panik belakangan”.
+- **Made to share:** a local “Cerita hari ini” report card and share image; no feed, no upload, no PII.
 - **Live:** Rp 49,000/month (Phase 2) for all maps + live traffic/weather/incidents, estimated crowding, and a real-trip planner; no fake live labels.
 - **Real places, original branding:** real station/road names; no official logos or copied announcements.
 - **Secure payments:** Mayar hosted checkout + SaaS membership; server-side entitlements; callbacks verified via Mayar API; reconciliation/refunds/cancellation.
 - **Live data that is honest:** traffic and weather are real; crowding/transit delay are estimates unless an operator feed is signed.
 - **Series-ready:** shared auth, payments, entitlements, live-data adapters, UI, content schemas, and Three.js runtime for future games.
-- **Tone:** dry, warm, self-deprecating, never punching down. The joke is how the character survives the day, not a verdict on the people living it. The series slogan is _“Susahnya nyata. Lucunya gratis.”_
+- **Tone:** dry, warm, self-deprecating, never punching down. The joke is how the character survives the day, not a verdict on the people living it. Series slogan: _“Susahnya nyata, dramanya gratis.”_ Drama rules: [ADR-0005](docs/adr/0005-drama-system.md).
 
 ---
 
@@ -125,7 +127,8 @@ See [architecture.md](docs/games/pejuang-nafkah/architecture.md) §14 and [deplo
 | ------------ | ----------------------------------------------------------------------------------------------- |
 | Monetization | Free one route + All Maps Rp 79,000 once + Live Rp 49,000/month (Phase 2) + cosmetics; no ads   |
 | Branding     | Real place names; original branding; no official logos/trade dress; voice/slogans in `brand.md` |
-| Tone         | Dry, warm, self-deprecating; “Susahnya nyata. Lucunya gratis.”; never punching down             |
+| Tone         | Dry, warm, self-deprecating; “Susahnya nyata, dramanya gratis.”; never punching down            |
+| Drama        | Rare (~1 in 5 runs), real-basis + fictionalised, fair/shareable, never paid, no real victims    |
 | Mayar entity | Personal merchant assumed; production only after KYC                                            |
 | Host         | `wniseries.ahaqqu.com` on existing netcup VPS + Cloudflare                                      |
 | Stack        | Astro + Vite/Three.js + Fastify + PostgreSQL + Better Auth + Mayar + TomTom/BMKG                |

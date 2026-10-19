@@ -1,7 +1,7 @@
 # plan.md — Pejuang Nafkah delivery plan
 
 **Phase-by-phase delivery with end-to-end verification**
-**Version:** 4.1
+**Version:** 4.2
 **Date:** 2026-10-19
 **Status:** Phase 0 + pre-alpha landing page implemented locally; game/checkout not started; Phase 0 gate pending access/spikes. v4 pricing: Free one route / All Maps Rp 79k / Live Rp 49k-month (Phase 2); Phase 3 cities.
 **Target host:** `https://wniseries.ahaqqu.com` (netcup VPS + Cloudflare edge)
@@ -144,9 +144,9 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 
 **Exit gate:** page builds; desktop/mobile screenshots; waitlist stores an email with consent and rejects invalid/honeypot; no console errors; copy clearly says pre-alpha. **Deployment and production KYC remain blocked on credentials/access. The landing page now uses Mayar + the 79k/49k offer.**
 
-### Phase 1 — Free-route vertical slice (8–12 weeks)
+### Phase 1 — Free-route vertical slice (9–13 weeks)
 
-**Goal:** prove the core fantasy and one-hand hypothesis on one real route, then make that route a complete motor + KRL + multimodal commute. Live data is not in this phase.
+**Goal:** prove the core fantasy and one-hand hypothesis on one real route, then make that route a complete motor + KRL + multimodal commute. Live data is not in this phase. Drama and sharing are in scope from the first slice.
 
 #### 1A — KRL slice (4–6 weeks)
 
@@ -166,13 +166,16 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 | 1.4  | Crowd density + brace + stumble model                                                                                       | Sim + tuning sheet                           |
 | 1.5  | One-hand input + HUD + pause/resume                                                                                         | Playable build                               |
 | 1.6  | Clock/fatigue/dignity/fare + report card                                                                                    | Score module                                 |
+| 1.6a | Kejadian/drama v0: 6 cards across 3 families, real-basis source log, sensitivity pre-review, deterministic selector         | Drama bank seed + source log                 |
+| 1.6b | One KRL drama + 2 responses + “Cerita hari ini” headline on the report card                                                 | Playable drama beat                          |
+| 1.6c | Local share card v0: route/drama/grade + “Gitu aja terus setiap hari”; Web Share + copy/download                            | Share module + privacy test                  |
 | 1.7  | Tutorial + first-run flow                                                                                                   | Onboarding                                   |
 | 1.8  | Save/checkpoint + offline run                                                                                               | IndexedDB + sync stub                        |
 | 1.9  | Tests: sim, scoring, station order, door side, one-hand input                                                               | Unit + E2E                                   |
 | 1.10 | Playtest round 1 (6–8 commuters)                                                                                            | Findings + changes                           |
 | 1.11 | Visual/performance evidence                                                                                                 | Screenshots, video, FPS profile              |
 
-#### 1B — Motor + multimodal + free route (4–6 weeks)
+#### 1B — Motor + multimodal + free route + drama (5–7 weeks)
 
 - Motor leg: home → Jurangmangu/Pondok Ranji, with real corridor cues, lights, angkot, ojol, busway, pedestrians, rain, razia (fictionalised).
 - Handoff: parking, e-money/top-up, platform walk, board.
@@ -182,19 +185,22 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 - Free route selection: one corridor, all modes; one courtesy change within 14 days (local stub; server enforcement in Phase 2).
 - Report card combines legs; day save.
 
-| #    | Task                                                                      | Output                      |
-| ---- | ------------------------------------------------------------------------- | --------------------------- |
-| 1.12 | Motor corridor data + block design                                        | Route graph, hazard weights |
-| 1.13 | Motor sim: auto-throttle, lateral filtering, braking, collision/near-miss | Deterministic sim           |
-| 1.14 | Traffic light + queue + angkot + ojol + busway + pedestrian AI            | Agent system                |
-| 1.15 | Rain/flood/razia scenarios                                                | Scenario system             |
-| 1.16 | Camera, lean, hitstop, audio placeholders                                 | Game feel pass              |
-| 1.17 | Handoff micro-beats + multimodal planner                                  | Flow                        |
-| 1.18 | State carry-over + combined score                                         | Sim + UI                    |
-| 1.19 | One-hand motor tuning + assists                                           | Input pass                  |
-| 1.20 | Free route picker (one route, stubbed local)                              | Onboarding                  |
-| 1.21 | E2E: motor → KRL → last mile; failure/recovery                            | Tests                       |
-| 1.22 | Playtest round 2 (8–12 users)                                             | Findings                    |
+| #    | Task                                                                                               | Output                      |
+| ---- | -------------------------------------------------------------------------------------------------- | --------------------------- |
+| 1.12 | Motor corridor data + block design                                                                 | Route graph, hazard weights |
+| 1.13 | Motor sim: auto-throttle, lateral filtering, braking, collision/near-miss                          | Deterministic sim           |
+| 1.14 | Traffic light + queue + angkot + ojol + busway + pedestrian AI                                     | Agent system                |
+| 1.15 | Rain/flood/razia scenarios                                                                         | Scenario system             |
+| 1.16 | Camera, lean, hitstop, audio placeholders                                                          | Game feel pass              |
+| 1.17 | Handoff micro-beats + multimodal planner                                                           | Flow                        |
+| 1.18 | State carry-over + combined score                                                                  | Sim + UI                    |
+| 1.19 | One-hand motor tuning + assists                                                                    | Input pass                  |
+| 1.20 | Free route picker (one route, stubbed local)                                                       | Onboarding                  |
+| 1.21 | E2E: motor → KRL → last mile; failure/recovery                                                     | Tests                       |
+| 1.22 | Playtest round 2 (8–12 users)                                                                      | Findings                    |
+| 1.23 | Drama bank v1: 10–15 cards, 3+ families, source IDs (≥2 each), kill list, sensitivity review       | Content pack + review       |
+| 1.24 | Drama fairness/frequency test: rarity, 2+ counterplays, no unwinnable run, no repeat within 5 runs | Tuning sheet + test report  |
+| 1.25 | Share card v1: 1:1/9:16, no PII, offline, text fallback, share comprehension test                  | Share module + findings     |
 
 #### Exit gate — Phase 1
 
@@ -206,9 +212,11 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 - [ ] Pause/resume exact state; offline run completes.
 - [ ] Sim deterministic; replay hash matches.
 - [ ] Playtest: ≥70% “fun/would play again”; ≥80% recognition; user sign-off.
+- [ ] Drama: every card has real-basis + ≥2 sources + sensitivity review; rarity/fairness test passes; no real recent tragedy/victim; no unwinnable drama.
+- [ ] Share: local card works offline, no precise location/PII, Web Share + fallback; ≥30% of testers would share.
 - [ ] Evidence: desktop/mobile video, traces, FPS CSV, playtest notes, tone review (no punch-down).
 
-**Phase 1 is the go/no-go for the whole game.** If the core is not fun/resonant, fix the design before expanding. Do not add payments or live data here.
+**Phase 1 is the go/no-go for the whole game.** If the core is not fun/resonant — or if the drama feels forced, exploitative, or too frequent — fix the design before expanding. Do not add payments or live data here.
 
 ---
 
@@ -276,7 +284,7 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 - Leaderboards (server stub) with categories; local first, server in Phase 5.
 - Commute diary, recurring characters, small weekly chapter.
 - Progression: familiarity, cosmetics, passport stamps.
-- Share card (local canvas).
+- Share card v2 (weekly recap, 1:1/9:16), drama journal, local canvas.
 - Save/sync design (local authoritative, server backup).
 
 #### Tasks
@@ -286,7 +294,7 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 | 2C.1 | Day/week state machine + save schema                         | Sim/meta                |
 | 2C.2 | Economy/budget tuning                                        | Tuning sheet + tests    |
 | 2C.3 | Daily seed + scenario generation                             | Deterministic generator |
-| 2C.4 | Report card, history, share card                             | UI + export             |
+| 2C.4 | Report card, history, share card v2 (weekly recap)           | UI + export             |
 | 2C.5 | Narrative beats + characters (v1 subset) + Bang Nafkah voice | Content pack            |
 | 2C.6 | Progression/cosmetics (free set)                             | Unlocks                 |
 | 2C.7 | Leaderboard UI + local stub                                  | UI                      |
@@ -630,27 +638,28 @@ These are planning ranges, not promises. If the quality gate is red, the date mo
 
 ## 8. Risk register
 
-| Risk                                | Likelihood | Impact | Mitigation                                                                     | Trigger                     |
-| ----------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------ | --------------------------- |
-| Core not fun / too stressful        | Medium     | High   | Phase 1 playtest, Santai mode, tone review, short runs                         | Recognition/fun <70%        |
-| Humour punches down / feels forced  | Medium     | High   | Native/punch-down review, one joke per beat, silent serious beats              | Any “mocking” report        |
-| Stale research drives a rewrite     | High       | High   | Per-phase brief/ADR, freshness expiry, revalidate before plan/code             | Expired source/brief        |
-| One-hand controls feel limited      | Medium     | High   | Four verbs, assists, real-device tests                                         | <90% completion             |
-| Three.js perf on low-end            | High       | High   | Budgets, instancing/LOD, adaptive quality, early spike                         | FPS <30 or thermal throttle |
-| Mayar personal KYC rejected/delayed | Medium     | High   | Apply early; verify individual/PT Perorangan path; sandbox first               | No approval by Phase 2 gate |
-| Payment bug/fraud                   | Low        | High   | Mayar API re-fetch, state machine, idempotency, reconciliation, pen test       | Any mismatch/chargeback     |
-| Content churn (Karet/Gapeka)        | High       | Medium | Versioned content, refresh drill, no hard-coded schedules                      | Source change               |
-| Live provider cost overrun          | Medium     | High   | Adaptive polling, corridor cache, budget caps, kill switch, weekly cost review | >80% budget                 |
-| Live data licence/terms issue       | Medium     | High   | Written provider terms; legal review; fallback to modeled data                 | No signed licence           |
-| “Live crowded” overpromise          | Medium     | High   | Label estimates; no live occupancy claim; operator partnership gate            | Marketing copy              |
-| Mayar webhook forgery               | Low        | High   | Never grant from payload; API re-fetch; idempotency; IP allowlist if available | Fake callback test          |
-| IP/brand complaint                  | Medium     | High   | Original branding, no logos/announcements, legal review                        | Any notice                  |
-| PDP/PSE compliance gap              | Medium     | High   | Data map, privacy policy, DPO review, PSE registration                         | Launch gate                 |
-| Scope creep                         | High       | High   | Corridor ribbons, phase gates, explicit out-of-scope                           | New feature without docs    |
-| Solo-dev burnout                    | Medium     | High   | Phases, reusable engine, cut scope, ask for help                               | Missed gates 2×             |
-| Platform dependency                 | Low        | Medium | VPS + Cloudflare; backups; portable Postgres                                   | Vendor change               |
-| Real-world tragedy sensitivity      | Medium     | High   | Composite events, no real victims, sensitivity review                          | Content review              |
-| Marketing overpromises              | Medium     | Medium | Show real gameplay, no fake trailers, clear free/paid                          | Conversion mismatch         |
+| Risk                                | Likelihood | Impact | Mitigation                                                                                    | Trigger                     |
+| ----------------------------------- | ---------- | ------ | --------------------------------------------------------------------------------------------- | --------------------------- |
+| Core not fun / too stressful        | Medium     | High   | Phase 1 playtest, Santai mode, tone review, short runs                                        | Recognition/fun <70%        |
+| Humour punches down / feels forced  | Medium     | High   | Native/punch-down review, one joke per beat, silent serious beats                             | Any “mocking” report        |
+| Stale research drives a rewrite     | High       | High   | Per-phase brief/ADR, freshness expiry, revalidate before plan/code                            | Expired source/brief        |
+| One-hand controls feel limited      | Medium     | High   | Four verbs, assists, real-device tests                                                        | <90% completion             |
+| Three.js perf on low-end            | High       | High   | Budgets, instancing/LOD, adaptive quality, early spike                                        | FPS <30 or thermal throttle |
+| Mayar personal KYC rejected/delayed | Medium     | High   | Apply early; verify individual/PT Perorangan path; sandbox first                              | No approval by Phase 2 gate |
+| Payment bug/fraud                   | Low        | High   | Mayar API re-fetch, state machine, idempotency, reconciliation, pen test                      | Any mismatch/chargeback     |
+| Content churn (Karet/Gapeka)        | High       | Medium | Versioned content, refresh drill, no hard-coded schedules                                     | Source change               |
+| Live provider cost overrun          | Medium     | High   | Adaptive polling, corridor cache, budget caps, kill switch, weekly cost review                | >80% budget                 |
+| Live data licence/terms issue       | Medium     | High   | Written provider terms; legal review; fallback to modeled data                                | No signed licence           |
+| “Live crowded” overpromise          | Medium     | High   | Label estimates; no live occupancy claim; operator partnership gate                           | Marketing copy              |
+| Mayar webhook forgery               | Low        | High   | Never grant from payload; API re-fetch; idempotency; IP allowlist if available                | Fake callback test          |
+| IP/brand complaint                  | Medium     | High   | Original branding, no logos/announcements, legal review                                       | Any notice                  |
+| PDP/PSE compliance gap              | Medium     | High   | Data map, privacy policy, DPO review, PSE registration                                        | Launch gate                 |
+| Scope creep                         | High       | High   | Corridor ribbons, phase gates, explicit out-of-scope                                          | New feature without docs    |
+| Solo-dev burnout                    | Medium     | High   | Phases, reusable engine, cut scope, ask for help                                              | Missed gates 2×             |
+| Platform dependency                 | Low        | Medium | VPS + Cloudflare; backups; portable Postgres                                                  | Vendor change               |
+| Real-world tragedy sensitivity      | Medium     | High   | ADR-0005 real-basis ledger, 12-month exclusion, no victims/identity blame, sensitivity review | Content review / complaint  |
+| Drama fatigue or feels unfair       | Medium     | High   | Rarity/fairness test, max one major/run, no pity timer, two counterplays                      | Recall/share < target       |
+| Marketing overpromises              | Medium     | Medium | Show real gameplay, no fake trailers, clear free/paid                                         | Conversion mismatch         |
 
 ---
 
@@ -716,20 +725,21 @@ These are planning ranges, not promises. If the quality gate is red, the date mo
 
 ## 11. Decision log
 
-| Date       | Decision                                                                                   | Rationale                                                                               |
-| ---------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| 2026-10-19 | Free = choose one route; All Maps Rp 79k one-time; Live Rp 49k/month; no ads               | User decision; free route is the real game; Live funds data; All Maps funds content     |
-| 2026-10-19 | Subscription + live data in Phase 2; other cities in Phase 3                               | User decision; live is the subscription’s reason to exist                               |
-| 2026-10-19 | Research-first gate: brief + ADR + benchmark/cost/security/WNI evidence before plan/code   | Prevents stale-fact rewrites and unsafe cost/security assumptions                       |
-| 2026-10-19 | Brand line: “Susahnya nyata. Lucunya gratis.” / “Berangkat. Berjuang. Sampai. Besok lagi.” | User direction; dry, self-deprecating, expandable per game                              |
-| 2026-10-18 | Real place names, original branding, no official logos                                     | Authenticity without IP/trade-dress risk                                                |
-| 2026-10-19 | Payment provider: Mayar; sandbox until KYC                                                 | User decision; supports one-time invoice + SaaS subscription; MoR but no tax processing |
-| 2026-10-19 | Live data: TomTom traffic/incidents + BMKG weather; crowding modeled/opt-in                | Only feasible real feeds today; no public KRL/TransJakarta live crowding                |
-| 2026-10-18 | Deploy to netcup VPS at `wniseries.ahaqqu.com`; Cloudflare edge                            | Existing infra; Postgres/payment/cron/fixed IP favor VPS                                |
-| 2026-10-18 | Astro platform + Vite/Three.js game + Fastify/Postgres API                                 | SEO/performance for web; control/determinism for game; robust payments                  |
-| 2026-10-18 | One-hand portrait-first, offline-tolerant; live snapshot at run start                      | The game is played during a commute; determinism/fairness                               |
-| 2026-10-18 | Versioned content packs with `effective_from`                                              | Real-world data changes; no hard-coded timetables                                       |
-| TBD        | Final subtitle/logo/voice budget; one-route change policy; All Maps future-city wording    | Design/product open questions                                                           |
+| Date       | Decision                                                                                                    | Rationale                                                                               |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 2026-10-19 | Free = choose one route; All Maps Rp 79k one-time; Live Rp 49k/month; no ads                                | User decision; free route is the real game; Live funds data; All Maps funds content     |
+| 2026-10-19 | Subscription + live data in Phase 2; other cities in Phase 3                                                | User decision; live is the subscription’s reason to exist                               |
+| 2026-10-19 | Research-first gate: brief + ADR + benchmark/cost/security/WNI evidence before plan/code                    | Prevents stale-fact rewrites and unsafe cost/security assumptions                       |
+| 2026-10-19 | Brand line: “Susahnya nyata, dramanya gratis.” / “Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.” | User direction; drama is core; dry, self-deprecating, expandable per game               |
+| 2026-10-19 | Drama = core, rare, real-basis, fictionalised, fair, shareable; ADR-0005                                    | User direction; freshness/memory/share engine; bounded to avoid exploiting real tragedy |
+| 2026-10-18 | Real place names, original branding, no official logos                                                      | Authenticity without IP/trade-dress risk                                                |
+| 2026-10-19 | Payment provider: Mayar; sandbox until KYC                                                                  | User decision; supports one-time invoice + SaaS subscription; MoR but no tax processing |
+| 2026-10-19 | Live data: TomTom traffic/incidents + BMKG weather; crowding modeled/opt-in                                 | Only feasible real feeds today; no public KRL/TransJakarta live crowding                |
+| 2026-10-18 | Deploy to netcup VPS at `wniseries.ahaqqu.com`; Cloudflare edge                                             | Existing infra; Postgres/payment/cron/fixed IP favor VPS                                |
+| 2026-10-18 | Astro platform + Vite/Three.js game + Fastify/Postgres API                                                  | SEO/performance for web; control/determinism for game; robust payments                  |
+| 2026-10-18 | One-hand portrait-first, offline-tolerant; live snapshot at run start                                       | The game is played during a commute; determinism/fairness                               |
+| 2026-10-18 | Versioned content packs with `effective_from`                                                               | Real-world data changes; no hard-coded timetables                                       |
+| TBD        | Final subtitle/logo/voice budget; one-route change policy; All Maps future-city wording                     | Design/product open questions                                                           |
 
 ---
 

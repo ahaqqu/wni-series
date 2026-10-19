@@ -25,6 +25,7 @@ Research-first requirements and templates: [research protocol](../games/pejuang-
 | [0002](0002-vps-first-cloudflare.md) | VPS-first + Cloudflare edge                      | Accepted | 2026-10-18 |
 | [0003](0003-mayar-payments.md)       | Mayar hosted checkout + SaaS membership          | Accepted | 2026-10-19 |
 | [0004](0004-live-data-providers.md)  | TomTom + BMKG, modelled crowding                 | Accepted | 2026-10-19 |
+| [0005](0005-drama-system.md)         | Rare, real-basis, fictionalised drama layer      | Accepted | 2026-10-19 |
 
 Existing architecture summary: [architecture.md](../games/pejuang-nafkah/architecture.md) §3.
 

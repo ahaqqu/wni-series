@@ -8,7 +8,7 @@ WNI Series is a multi-game platform. Each game has its own folder under `docs/ga
 | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | [specs.md](games/pejuang-nafkah/specs.md)                         | Product principles, objectives, functional/non-functional requirements, security/privacy, release criteria |
 | [design.md](games/pejuang-nafkah/design.md)                       | Game feel, dual mode, systems, art direction, one-hand UX, web/motion design, monetization                 |
-| [brand.md](games/pejuang-nafkah/brand.md)                         | Slogans, WNI Series expansion template, Bang Nafkah voice, humour rules                                    |
+| [brand.md](games/pejuang-nafkah/brand.md)                         | Slogans, drama engine, WNI Series expansion template, Bang Nafkah voice, humour rules                      |
 | [research/PROTOCOL.md](games/pejuang-nafkah/research/PROTOCOL.md) | Research-first gate: latest tech/data, security, performance, cost, scaling, WNI experience                |
 | [ADR index](adr/README.md)                                        | Architecture decision records and rejected alternatives                                                    |
 | [plan.md](games/pejuang-nafkah/plan.md)                           | Phase-by-phase delivery, gates, evidence, risks, launch checklist                                          |

@@ -75,6 +75,17 @@
 
 **Evidence:** anonymised notes, consent log, themes, quotes, design changes; no PII/faces/voices without release.
 
+### R-DRAMA — real-basis drama, sensitivity, share
+
+- Source bank: ≥10–15 cards across ≥3 families (flood, demo, minor accident, crowd conflict, transit failure, infrastructure, city event); each with `realBasis` + ≥2 independent sources + date + confidence + `fictionalised` note.
+- Location allow-list for the launch corridor; verify that a flood point/demo route/blackspot is real before authoring.
+- Sensitivity review: no real recent tragedy (12-month default), victims, graphic injury, identity blame, names/likeness; native Indonesian reviewer.
+- Rarity/fairness: target ~1 in 5 runs, max one major/run, two counterplays, one viable out, no repeat within 5 runs; no pity timer.
+- Share: what would a commuter send; 1:1 vs 9:16; no home/work pin, name, photo, or upload; Web Share + download/copy on low-end Android and iOS Safari.
+- Full plan: [2026-10 drama system](2026-10-drama-system.md); decision: [ADR-0005](../../../adr/0005-drama-system.md).
+
+**Evidence:** source log, 10–15 draft cards, sensitivity/native review note, frequency/fairness test, share comprehension test.
+
 ### R-LEGAL — content/licence
 
 - OSM ODbL attribution; font/image/audio licences; no official operator logo/trade dress/PA audio.
@@ -89,10 +100,11 @@
 
 1. **Desk research (R1):** official docs/data/price pages; source log; draft questions.
 2. **Technical spike (R1/R2):** minimal Three.js corridor, deterministic replay, reference-device benchmark; ADR for renderer/sim/offline.
-3. **Field research (R2):** ride-along + diary + body map + interviews; synthesis.
+3. **Field research (R2):** ride-along + diary + body map + interviews; synthesis. Include drama recall/retell questions and “would this feel exploitative?”
 4. **Data validation:** station/fare/door-side/geometry sheet; second source; content snapshot.
-5. **Security/cost/scale review:** threat model, headers, dependency scan, cost sheet, failure injection.
-6. **Gate review:** protocol checklist; unresolved unknowns become stop conditions.
+5. **Drama research:** source bank, sensitivity/native review, frequency/fairness test, share test.
+6. **Security/cost/scale review:** threat model, headers, dependency scan, cost sheet, failure injection.
+7. **Gate review:** protocol checklist; unresolved unknowns become stop conditions.
 
 ## 3. Deliverables
 
@@ -104,6 +116,8 @@
 - [ ] Threat model/security note
 - [ ] WNI experience note (anonymised)
 - [ ] Native/punch-down review note
+- [ ] Drama source log + 10–15 draft cards + sensitivity review
+- [ ] Drama rarity/fairness/recall test + share comprehension test
 - [ ] Go/no-go recommendation to the user
 
 ## 4. Stop conditions
@@ -113,6 +127,9 @@
 - OSM/asset licence is unclear.
 - Benchmark misses 30 fps floor on the low-end reference device without a credible fix.
 - Field research cannot be recruited/consented; do not substitute stereotypes.
+- A drama family has no two independent sources, no location allow-list, or no sensitivity/native review.
+- A card depends on a real recent tragedy/victim or an identity group for its punchline.
+- The share card cannot avoid precise location/PII or fails on low-end devices.
 - The cost/scale/security model has no cap or the worst case is unacceptable.
 - The user has not approved the Phase 0 gate/Phase 1 scope.
 

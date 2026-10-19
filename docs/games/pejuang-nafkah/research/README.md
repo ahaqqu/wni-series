@@ -12,6 +12,7 @@
 | [findings/F5.md](findings/F5.md)                                 | Route templates, budgets, handoffs                                             |
 | [2026-10-refresh.md](2026-10-refresh.md)                         | 2026 transport/market/legal refresh; payment section is historical             |
 | [2026-10-live-data-and-mayar.md](2026-10-live-data-and-mayar.md) | Mayar fees/subscriptions, TomTom/BMKG/transit/crowding feasibility, cost model |
+| [2026-10-drama-system.md](2026-10-drama-system.md)               | Drama real-basis/source-bank plan, sensitivity, rarity, share research         |
 
 ## Rules
 

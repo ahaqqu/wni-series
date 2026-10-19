@@ -1,12 +1,12 @@
 # design.md — Pejuang Nafkah
 
 **Game design, experience design, art direction, and web design**
-**Version:** 4.1
+**Version:** 4.2
 **Date:** 2026-10-19
 **Status:** design baseline — game/checkout not started; pre-alpha landing page exists
 **Companion docs:** [specs.md](specs.md) · [plan.md](plan.md) · [architecture.md](architecture.md) · [brand](brand.md) · [research protocol](research/PROTOCOL.md) · [research refresh](research/2026-10-refresh.md) · [live-data/Mayar research](research/2026-10-live-data-and-mayar.md)
 
-> **Design thesis:** the commute is not the obstacle between home and work. The commute _is_ the day. Make it playable with one thumb, make it recognisable in five seconds, and make the player feel competent, seen, and a little lighter when they arrive.
+> **Design thesis:** the commute is not the obstacle between home and work. The commute _is_ the day — including the day it goes sideways. Make it playable with one thumb, make it recognisable in five seconds, and make the player feel competent, seen, and a little lighter when they arrive with a story to tell.
 
 ---
 
@@ -24,7 +24,8 @@ The player should recognise:
 - the angkot that stops anywhere, the ojol that cuts in, the busway barrier;
 - the heat, the rain, the crowd, the smell of coffee, the sound of the door chime;
 - the small social negotiations: a seat, a strap, a queue, a stranger’s shoulder;
-- the emotional arithmetic: leave earlier vs sleep longer, ojek now vs walk, late vs broke.
+- the emotional arithmetic: leave earlier vs sleep longer, ojek now vs walk, late vs broke;
+- the day the city interrupted the plan: the flood, the demo, the stopped train, the small fight — and the fact that people still got to work, joking about it.
 
 And they should feel:
 
@@ -32,7 +33,8 @@ And they should feel:
 - **recognised** — the game knows this life, without pitying it;
 - **amused** — the absurdity is affectionate, not cruel;
 - **relieved** — arrival is a real exhale;
-- **curious** — tomorrow is different, and there is another route to try.
+- **curious** — tomorrow is different, and there is another route to try;
+- **surprised** — “wah, ada drama apa hari ini?” — rare enough to be a story, fair enough to retell.
 
 ### 1.2 What this is not
 
@@ -41,6 +43,7 @@ And they should feel:
 - Not a management spreadsheet. Money matters, but the player feels it, not audits it.
 - Not a theme-park “Indonesia” with gamelan and batik wallpaper. Specificity is earned through roads, language, behaviour, and small details.
 - Not a power fantasy where the player “fixes” Jakarta. The city is a condition, not a boss.
+- Not a disaster simulator or a news reenactment. Drama is real-basis, fictionalised, rare, and never built on a real victim.
 
 ### 1.3 Emotional arc of one commute
 
@@ -54,6 +57,8 @@ And they should feel:
 | **Pulang** (optional)       | release, reflection              | reverse commute, night lights, a call home, a small treat          |
 
 The game should let the player **linger** in the quiet moments and **panic** in the tight ones, then give them a breath.
+
+A major drama is not part of every arc. When it happens, it cuts across the phase table: the plan changes, the clock gets tighter, and the story becomes “hari ini ada drama”. The emotional target is not constant chaos; it is the relief of a day that could have gone worse, told with a laugh.
 
 ---
 
@@ -69,6 +74,7 @@ The game should let the player **linger** in the quiet moments and **panic** in 
 8. **Fair free, honest paid.** The free game is the game.
 9. **Performance is part of the fantasy.** A stutter breaks the spell.
 10. **Built to be replayed, not ground.** Daily seeds, different weather, different choices.
+11. **Drama is rare, real, and retold.** The city interrupts the plan; the character shrugs, jokes, and finds a way; the player leaves with a story.
 
 ---
 
@@ -77,16 +83,17 @@ The game should let the player **linger** in the quiet moments and **panic** in 
 ### 3.1 The run loop
 
 ```text
-PLAN  →  MOVE  →  READ  →  DECIDE  →  FEEL  →  ARRIVE  →  REFLECT  →  RETRY / NEXT
+PLAN  →  MOVE  →  READ  →  [DRAMA?]  →  DECIDE  →  FEEL  →  ARRIVE  →  REFLECT / SHARE  →  RETRY / NEXT
 ```
 
 - **Plan:** choose route, mode, departure time, budget. Free/All Maps players use authored conditions; Live players get a timestamped traffic/weather/incident snapshot and a crowding estimate, then freeze it for the run.
 - **Move:** auto-forward (motor) or train motion (KRL); the player controls lateral position, braking, bracing, boarding.
 - **Read:** scan the road/crowd for telegraphs: brake lights, turn signals, angkot door, yellow line, door light, crowd pressure.
+- **Drama?** rarely, the run interrupts the plan: water across the underpass, cones and a demo, a stopped train, a crowd argument. The drama is telegraphed and frozen into the run; the player chooses a response, not a reflex.
 - **Decide:** one-thumb action with a clear risk/reward.
 - **Feel:** audio/visual/haptic feedback; the world responds; resources tick.
 - **Arrive:** the office/station/transfer; a short beat of relief.
-- **Reflect:** report card, a line of story, a share card.
+- **Reflect:** report card, a “Cerita hari ini” line, a local share card.
 - **Retry:** same seed to learn, or new seed for variety.
 
 ### 3.2 The day loop
@@ -298,8 +305,8 @@ Tepat waktu  B+   Selamat  A-   Tenang  C+   Hemat  B   Dignity  A
 ### 5.7 Daily seed and variation
 
 - The daily seed is `date + route + mode + contentVersion` hashed; all players get the same base scenario.
-- Variation: weather (clear/rain/flood), incidents (signal failure, angkot strike? use composites), a “lucky” event, a social encounter, a road closure.
-- Personal variation comes from decisions, not random punishment.
+- Variation: weather (clear/rain/flood), small kejadian, rare drama (see §5.11), a “lucky” event, a social encounter, a road closure.
+- Personal variation comes from decisions, not random punishment. Drama selection is seeded and frozen at run start; it is never a mid-run gotcha.
 - Weekend seeds: lighter traffic, family errands, “pulang” mood.
 - No live-service FOMO; the daily challenge is a reason to return, not a punishment for missing.
 
@@ -324,6 +331,104 @@ Tepat waktu  B+   Selamat  A-   Tenang  C+   Hemat  B   Dignity  A
 - No notification spam; at most one optional “hari ini sudah siap” local notification if the user opts in.
 - No “return in X hours” gating.
 - No pre-checked consent; no hiding the free option.
+
+### 5.11 Drama system
+
+**Purpose.** Drama is the freshness and memory engine. It gives the player a reason to wonder “wah, ada drama apa hari ini?”, a story to retell, and a reason to share. It is not a difficulty spike and not a misery generator.
+
+#### Layers
+
+| Layer            | Target frequency            | Role                                          | Examples                                                                                                     |
+| ---------------- | --------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Kejadian**     | 1–3 per run                 | Texture; small, low-stakes, often funny       | Card reader rejects, queue jump, strap tangles, angkot stops in-lane, forgotten helmet                       |
+| **Drama**        | ~1 in 5 runs; max 1 per run | Changes the plan; creates the day's story     | Flooded underpass, permitted demo, minor accident congestion, signal failure, market crowd pinch             |
+| **Drama langka** | ~1 in 25 runs               | Once-in-a-while city moment; highly shareable | A rare combination (heavy rain + road closure + power outage) or a once-a-season event, always fictionalised |
+
+These are starting hypotheses, not locks. Tune after the frequency test; never add a pity timer that makes drama feel scheduled.
+
+#### Selection and determinism
+
+- Selected at **run start** from `runSeed + contentVersion + route + mode + departure time + weather + conditions`.
+- Frozen for the run; no server push, no mid-run random event, no network needed.
+- At most one major drama per run; the same major drama does not repeat within 5 runs on the same route.
+- The daily seed gives all players the same **base** drama opportunity; personal choices and skill change the outcome, not the card.
+- Live data may change the **conditions** (rain, incident probability) at generation time; it never rewrites a scored run.
+
+#### Real basis, fictional detail
+
+Every card carries:
+
+```json
+{
+  "id": "drama-flood-underpass-01",
+  "family": "flood",
+  "rarity": "drama",
+  "realBasis": "Recurring flash flooding at a low-lying underpass on the corridor",
+  "sourceIds": ["src-bpbd-flood-2026", "src-news-flood-underpass-2025"],
+  "retrievedAt": "2026-10-19",
+  "confidence": "high",
+  "fictionalised": "Composite location detail and timing; no real victim or event reconstruction",
+  "sensitivity": "low",
+  "conditions": { "weather": ["heavy-rain"], "time": ["05:30-09:00"] },
+  "telegraph": "Water line, stalled motorbikes, riders turning back",
+  "choices": ["wait", "detour", "push-through-slowly", "ask-for-help"],
+  "bangLines": ["Kolam renang gratis. Sayangnya bukan hari libur."],
+  "shareHeadline": "Underpass jadi kolam. Muter, telat, sampai."
+}
+```
+
+No card ships without `realBasis`, ≥2 `sourceIds`, a `fictionalised` note, and a sensitivity review. See [ADR-0005](../../adr/0005-drama-system.md) and the [source-bank plan](research/2026-10-drama-system.md).
+
+**Hard exclusions:** real recent tragedy (default 12 months), identifiable victims/bystanders, mass-casualty events, terrorist attacks, communal/religious/ethnic blame, graphic injury, real person's name/likeness, disaster tourism, comedic rescue.
+
+#### Fairness
+
+- **Telegraph before commitment:** the water line, the cones, the crowd swell, the brake lights, the station announcement. The player should be able to say “I saw that coming”.
+- **At least two readable responses**, and at least one viable out. Costs are bounded: time, money, dignity, or fatigue.
+- **No unwinnable drama.** A bad choice can hurt the grade, not delete the run.
+- **No QTE-only drama** and no precision tap in the top third; it must work one-handed on a moving train.
+- If the player ignores every telegraph, the consequence is still explainable on the report card.
+
+#### Response verbs
+
+| Verb            | What it does                        | Cost       | Reward                    |
+| --------------- | ----------------------------------- | ---------- | ------------------------- |
+| **Santai**      | Accept the delay; protect calm      | Time       | Tenang, dignity           |
+| **Akal**        | Detour, reroute, negotiate, fix     | Money/time | Tepat waktu, mastery      |
+| **Bantu**       | Help someone in the mess            | Time       | Bermartabat, relationship |
+| **Bercanda**    | Break the tension with a small joke | Small time | Tenang, social beat       |
+| **Putar balik** | Retreat to a safer plan             | Time       | Selamat, no shame         |
+
+The player may also do nothing. Silence is a valid response; the game does not force a punchline.
+
+#### Character and tone
+
+- Bang Nafkah names the absurdity, shrugs, and offers the next move: “Bercanda dulu, panik belakangan.”
+- The joke comes **after** the player understands the problem, never instead of the problem.
+- A serious beat (injury, someone in distress) gets warmth or silence; no quip, no score pop-up.
+- The character never blames a crowd, a worker, a religion, or an ethnicity for the drama. The system, the weather, the city, and the situation are fair targets.
+
+#### Memory and sharing
+
+- Report card: **“Cerita hari ini”** headline + drama stamp + the Bang line.
+- **Cerita** journal: unlocked drama stories, replayable, no gacha.
+- Weekly recap: “Drama minggu ini” — a short, shareable summary.
+- **Share card:** generated on-device after arrival; 1:1 and 9:16 variants; route corridor, drama type, grade, headline, “Gitu aja terus setiap hari.”
+  - Web Share API where available; download/copy fallback.
+  - No upload, no account, no public feed, no UGC in v1.
+  - No precise home/work pin, real name, photo, or provider data. Corridor-level only.
+  - Text fallback if image generation exceeds the low-end budget.
+
+#### Monetization
+
+Drama is part of the free game. It is never sold, never gated by All Maps/Live, never a gacha. Cosmetics may style the share card; they do not change the drama.
+
+#### Content operations
+
+- Source bank refreshed before each city/season release; a stale source is a red gate.
+- Kill list and correction/takedown path; a card that ages badly can be disabled by content flag without a code release.
+- Native + sensitivity review recorded in the content pack.
+- Frequency/fairness/recall test with 8–12 players before content lock.
 
 ---
 
@@ -387,12 +492,14 @@ Tepat waktu  B+   Selamat  A-   Tenang  C+   Hemat  B   Dignity  A
 
 **Subscription ethics:** cancel in two taps; show renewal date; no fake urgency; Live is optional; free and All Maps still work if Live is unavailable. Cost-aware degradation: if the provider budget is exhausted, show cached data with a stale label rather than a broken screen.
 
-### 6.5 Events
+### 6.5 Events and drama
 
-- **Composite, not documentary:** a flood event is a plausible composite of known points, not a specific recent tragedy. No real victims, no real accident recreations.
+- **Drama is the headline event layer.** Kejadian provide texture; drama changes the plan; rare drama becomes the story of the week. Full system: §5.11.
+- **Composite, not documentary:** a flood card is a plausible composite of known points, not a specific recent tragedy. No real victims, no real accident recreations.
 - **Telegraphed:** the player sees the water line, the queue, the police cones, the crowd swell before committing.
 - **Counterplay:** detour, wait, pay, ask, walk, turn back. There is always a choice, even if all choices cost something.
-- **Stories, not loot:** event outcomes create a line in the report card, a relationship beat, or a new route marker.
+- **Stories, not loot:** event outcomes create a “Cerita hari ini” line, a relationship beat, a share card, or a new route marker.
+- **Rarity is content:** not every run gets a drama. The absence is part of the rhythm; the presence is the story.
 
 ### 6.6 Characters and narrative
 
@@ -409,9 +516,9 @@ Recurring cast (small, optional, non-intrusive):
 
 ### 6.7 Tone, slogans, and copy
 
-**Series line:** **“Susahnya nyata. Lucunya gratis.”**
+**Series line:** **“Susahnya nyata, dramanya gratis.”**
 **Long line:** **“Jadi WNI itu susah. Untung di game bisa di-pause.”**
-**Game line:** **“Berangkat. Berjuang. Sampai. Besok lagi.”**
+**Game line:** **“Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.”**
 **Support:** “Bukan balapan. Ini perjalanan menuju gajian.” / “Satu jempol. Satu tujuan: gajian.”
 
 - **Voice:** Jakarta Indonesian, dry, warm, code-switching natural (“udah telat, hujan pula”). Not forced meme-speak.
@@ -420,9 +527,10 @@ Recurring cast (small, optional, non-intrusive):
 - **Sadness:** quiet, specific, no melodrama. A serious failure gets no punchline. Example: “Kamu sampai. Sepatu basah. Rapat jam sembilan.”
 - **Respect:** never call the player stupid; never call commuters “NPC”; never make poverty a joke.
 - **Bilingual:** Indonesian primary; English secondary with local terms preserved/glossed.
-- **Bang Nafkah:** the narrator/brand face. Tired, observant, funny; the voice in the player’s head, not the player. Catchphrases: “Besok lagi.”, “Gajian dulu.”, “Kursi kosong itu mitos.”, “Yang penting sampai.” Full rules: [brand.md](brand.md).
+- **Bang Nafkah:** the narrator/brand face. Tired, observant, funny; the voice in the player’s head, not the player. Catchphrases: “Gitu aja terus setiap hari.”, “Bercanda dulu, panik belakangan.”, “Drama boleh. Panik jangan.”, “Gajian dulu.”, “Kursi kosong itu mitos.”, “Yang penting sampai.” Full rules: [brand.md](brand.md).
 - **No forced laughter:** the player can be tired, quiet, or angry. Humour is an invitation, not a demand.
-- **Tone layer:** the website uses a “sodium dawn + warung sticker” layer: highlighter series line, sambal “Besok lagi.” punchline, ticker, recognition stamps, a single Bang Nafkah card, and the “Tidak ada jebakan. Kecuali macet.” pricing heading. Serious data/payment/legal sections stay straight. See §10.5a and [brand.md](brand.md).
+- **Drama tone:** the character meets drama with bercanda dan santai, not denial. The joke is a breath before the practical move, never a substitute for it. A serious beat gets silence or kindness. See §5.11.
+- **Tone layer:** the website uses a “sodium dawn + warung sticker” layer: highlighter series line, sambal “Gitu aja terus setiap hari.” punchline, ticker, drama stamps, a single Bang Nafkah card, and the “Tidak ada jebakan. Kecuali macet.” pricing heading. Serious data/payment/legal sections stay straight. See §10.5a and [brand.md](brand.md).
 
 **Sample copy:**
 
@@ -432,7 +540,8 @@ Recurring cast (small, optional, non-intrusive):
 | Late 3 min   | “Telat tiga menit. Masih bisa bilang ‘macet’.”                     |
 | Door closing | “Pintu mau tutup. Pilih: masuk, atau tunggu kereta berikutnya.”    |
 | Low dignity  | “Ada bahu orang asing di lehermu. Kamu diam saja.”                 |
-| Arrival      | “Sampai. Capek. Tapi sampai. Besok lagi.”                          |
+| Arrival      | “Sampai. Capek. Tapi sampai. Gitu aja terus setiap hari.”          |
+| Drama        | “Banjir, demo, dan motorku mati. Sampai juga.”                     |
 | Report card  | “Hari ini kamu tidak menang. Kamu berangkat. Itu sudah sesuatu.”   |
 | Purchase     | “Sekali bayar. Tidak ada iklan. Tidak ada jebakan. Kecuali macet.” |
 
@@ -641,8 +750,8 @@ A scroll-driven “one morning” in five scenes:
 1. **05:12 — Alarm.** Dark room, phone glow, a hand reaching. Copy: “Setiap pagi, kamu berangkat lebih awal dari yang orang lihat.”
 2. **05:40 — Motor.** Headlight cone, wet asphalt, a gap opening. Copy: “Selip. Rem. Gas. Ulang.”
 3. **06:15 — Stasiun.** Yellow line, train lights, crowd. Copy: “Berdesakan. Tapi semua orang juga mau sampai.”
-4. **07:10 — Di dalam.** Straps, shoulders, window reflections. Copy: “Tiga puluh menit. Satu tangan. Kamu bisa main di sini.”
-5. **08:29 — Kantor.** Lift doors, AC, a breath. Copy: “Sampai. Capek. Tapi sampai. Besok lagi.” CTA: **Main gratis**.
+4. **07:10 — Di dalam.** Straps, shoulders, window reflections. Copy: “Tiga puluh menit. Satu tangan. Kadang ada drama.”
+5. **08:29 — Kantor.** Lift doors, AC, a breath. Copy: “Sampai. Capek. Tapi sampai. Gitu aja terus setiap hari.” CTA: **Main gratis**.
 
 The narrative is skippable, reduced-motion friendly, and readable without animation.
 
@@ -667,9 +776,10 @@ The narrative is skippable, reduced-motion friendly, and readable without animat
 
 The visual identity is **“sodium dawn + warung sticker.”** The atmospheric base stays cinematic; the humour is applied in a thin, deliberate layer so the serious parts remain serious.
 
-- **Series line:** **“Susahnya nyata. Lucunya gratis.”** on a highlighter sticker in the hero, footer, OG, and about page.
-- **Game punchline:** **“Besok lagi.”** as a sambal-red sticker under the hero title; the fourth beat after “Berangkat. Berjuang. Sampai.”
-- **Ticker:** a highlighter-yellow receipt strip between hero and the first content section: “Berangkat · Berjuang · Sampai · Besok lagi · Kursi kosong itu mitos · Gajian dulu.” Pauses/static-wraps under reduced motion.
+- **Series line:** **“Susahnya nyata, dramanya gratis.”** on a highlighter sticker in the hero, footer, OG, and about page.
+- **Game punchline:** **“Gitu aja terus setiap hari.”** as a sambal-red sticker under the hero title; the fourth beat after “Berangkat. Berjuang. Sampai.”
+- **Ticker:** a highlighter-yellow receipt strip between hero and the first content section: “Berangkat · Berjuang · Sampai · Gitu aja terus setiap hari · Kursi kosong itu mitos · Gajian dulu.” Pauses/static-wraps under reduced motion.
+- **Drama section:** a compact “Hari ini dramanya apa?” block with 3 stamps (“PERNAH TERJADI”, “LANGKA”, “JANGAN DITIRU”), a share-card mock, and the rule that drama is rare, real-basis, and never at a real victim’s expense.
 - **Bang Nafkah:** an original cream sticker portrait (teal helmet, amber thermos, tired smile) with a speech bubble. He is the narrator, not the player. One card is enough; do not turn every section into a mascot parade.
 - **Stamps/tape:** recognition cards get a small tape strip and a rotated stamp (“RELATE”, “8 DETIK”, “BASAH”); pricing gets one “PALING MASUK AKAL” stamp. These are seasoning, not structure.
 - **Headline jokes:** “Tidak ada jebakan. Kecuali macet.” / “Satu jempol. Satu tujuan: gajian.” / “Kadang harganya parkir.”
@@ -809,13 +919,13 @@ Ask: “Where is this? What time is it? What is happening?” Target: ≥80% cor
 
 ### 14.3 Emotional test
 
-- Post-run: “What did this remind you of?”; “Did it feel respectful?”; “Did you want to play again?”; “Would you show a friend?”
+- Post-run: “What did this remind you of?”; “Did it feel respectful?”; “Did you want to play again?”; “Would you show a friend?”; “What drama happened?”; “Would you retell it?”; “Did any card feel like it mocked a real victim?”
 - Compare with the lived-experience themes from §14.0; note where the game overclaims or flattens.
-- Target: ≥70% positive; ≤10% “miserable/mocking”.
+- Target: ≥70% positive; ≤10% “miserable/mocking”; ≥60% can retell a drama unprompted; ≥30% would share the card.
 
 ### 14.4 Authenticity checklist
 
-Use `specs.md` §14. Every corridor must pass before content lock. A single wrong station order is a P1 content bug.
+Use `specs.md` §14. Every corridor must pass before content lock. A single wrong station order is a P1 content bug. Every drama card must show `realBasis`, source IDs, a `fictionalised` note, and a sensitivity review before it can ship.
 
 ---
 
@@ -823,13 +933,15 @@ Use `specs.md` §14. Every corridor must pass before content lock. A single wron
 
 ```text
 Public sources → source registry → normalized data → hand-authored gameplay graph
-→ scenario/event design → native copy review → playtest → content pack → release
+→ kejadian/drama bank (real basis + sensitivity) → native copy review
+→ playtest (rarity/fairness/recall) → content pack → release
 ```
 
 - **Source registry:** URL, retrieval date, confidence, licence.
 - **Normalized data:** stations, routes, rules, landmarks, flood points.
 - **Gameplay graph:** lane nodes, decision gates, hazard weights, camera cues; hand-authored for fun.
 - **Scenario design:** weather/incident/event combinations, seeded weights, anti-frustration rules.
+- **Drama bank:** real-basis ledger, source IDs, rarity, conditions, choices, effects, Bang lines, share headlines, kill list, sensitivity review.
 - **Copy:** Indonesian native review, sensitivity review, glossary.
 - **Validation:** schema, station order, distances, fare formula, door side, landmark check.
 - **Release:** version, `effective_from`, changelog, in-game date stamp.
@@ -839,19 +951,21 @@ Public sources → source registry → normalized data → hand-authored gamepla
 
 ## 16. Risks and design debt
 
-| Risk                    | Design response                                                       |
-| ----------------------- | --------------------------------------------------------------------- |
-| Too stressful / not fun | “Santai” mode, readable telegraphs, soft failure, humor, short runs   |
-| Too realistic / boring  | Decision density, social beats, daily variation, beautiful moments    |
-| Misery porn             | Tone rules, sensitivity review, kindness mechanics, no real tragedies |
-| One-hand feels limited  | Four verbs, contextual depth, assists, test on real phones            |
-| Content churn           | Versioned data, refresh drill, no hard-coded timetables               |
-| IP/brand risk           | Original branding, no logos/announcements, legal review               |
-| Performance on low-end  | Stylised low-poly, instancing, LOD, adaptive quality, budgets         |
-| Web marketing too heavy | Static Astro, lazy 3D, reduced motion, performance budgets            |
-| Monetization backlash   | Free complete core, no ads, clear price, refunds                      |
-| Leaderboard cheating    | Deterministic sim, server replay, top-100 validation                  |
-| Scope creep             | Corridor ribbons, v1 scope, phase gates                               |
+| Risk                     | Design response                                                                                    |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| Too stressful / not fun  | “Santai” mode, readable telegraphs, soft failure, humor, short runs                                |
+| Too realistic / boring   | Decision density, social beats, daily variation, beautiful moments                                 |
+| Misery porn              | Tone rules, sensitivity review, kindness mechanics, no real tragedies                              |
+| Drama feels exploitative | Real-basis ledger, 12-month tragedy exclusion, no victims/identity blame, kill list, native review |
+| Drama fatigue / too rare | Frequency test, at most one major run, no pity timer, rare variants, recall/share metric           |
+| One-hand feels limited   | Four verbs, contextual depth, assists, test on real phones                                         |
+| Content churn            | Versioned data, refresh drill, no hard-coded timetables                                            |
+| IP/brand risk            | Original branding, no logos/announcements, legal review                                            |
+| Performance on low-end   | Stylised low-poly, instancing, LOD, adaptive quality, budgets                                      |
+| Web marketing too heavy  | Static Astro, lazy 3D, reduced motion, performance budgets                                         |
+| Monetization backlash    | Free complete core, no ads, clear price, refunds                                                   |
+| Leaderboard cheating     | Deterministic sim, server replay, top-100 validation                                               |
+| Scope creep              | Corridor ribbons, v1 scope, phase gates                                                            |
 
 ---
 
@@ -865,7 +979,7 @@ Public sources → source registry → normalized data → hand-authored gamepla
 6. Which 3 cosmetics are free vs paid at launch.
 7. Whether `tim subuh` is a difficulty or a separate mode.
 8. How to depict pickpocket/harassment without trivialising it (likely omit harassment; pickpocket as a tense, non-graphic event).
-9. Share-card privacy and watermarking.
+9. Share-card format/watermark after the share test; exact drama rarity after the frequency test.
 10. English localization depth (UI only vs full story).
 11. Confirm one-route free choice + one courtesy change in 14 days.
 12. Confirm whether All Maps explicitly includes every future Phase 3 city (recommended: yes for Pejuang Nafkah, not future games).

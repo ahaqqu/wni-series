@@ -1,5 +1,7 @@
 # Landing v4.1 — brand, slogans, and humour theme
 
+> **Superseded by [drama-report.md](drama-report.md) (v4.2).** Kept as the historical v4.1 snapshot.
+
 **Date:** 2026-10-19
 **Scope:** WNI Series / Pejuang Nafkah voice and slogans; landing-page tone layer. No game, checkout, or live-data implementation.
 
