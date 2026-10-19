@@ -1,0 +1,22 @@
+{
+  "name": "Pejuang Nafkah",
+  "short_name": "Pejuang Nafkah",
+  "description": "Game satu tangan tentang perjalanan pagi di Jabodetabek. Susahnya nyata. Lucunya gratis.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#06111b",
+  "theme_color": "#06111b",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

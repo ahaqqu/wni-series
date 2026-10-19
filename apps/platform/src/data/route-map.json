@@ -1,0 +1,121 @@
+{
+  "generatedFrom": "OpenStreetMap Overpass API",
+  "retrievedAt": "2026-10-18T15:51:21Z",
+  "attribution": "© OpenStreetMap contributors, ODbL",
+  "bbox": [106.704, -6.307, 106.846, -6.164],
+  "stations": [
+    {
+      "id": "jurangmangu",
+      "name": "Jurangmangu",
+      "code": "JMU",
+      "kind": "krl",
+      "line": "Rangkasbitung",
+      "door": "Kanan",
+      "km": 15.33,
+      "note": "Stasiun side platform, dekat Bintaro Xchange.",
+      "label": "right",
+      "xPct": 21.842,
+      "yPct": 82.369
+    },
+    {
+      "id": "pondok-ranji",
+      "name": "Pondok Ranji",
+      "code": "PDJ",
+      "kind": "krl",
+      "line": "Rangkasbitung",
+      "door": "Kanan",
+      "km": 13.15,
+      "note": "Titik parkir motor dan ojek langganan.",
+      "label": "right",
+      "xPct": 31.389,
+      "yPct": 75.113
+    },
+    {
+      "id": "kebayoran",
+      "name": "Kebayoran",
+      "code": "KBO",
+      "kind": "krl",
+      "line": "Rangkasbitung",
+      "door": "Kanan",
+      "km": 6.93,
+      "note": "Mulai ramai. Siap-siap berdiri.",
+      "label": "left",
+      "xPct": 54.627,
+      "yPct": 51.055
+    },
+    {
+      "id": "palmerah",
+      "name": "Palmerah",
+      "code": "PLM",
+      "kind": "krl",
+      "line": "Rangkasbitung",
+      "door": "Kanan",
+      "km": 3.19,
+      "note": "Satu stasiun lagi menuju Tanah Abang.",
+      "label": "left",
+      "xPct": 63.652,
+      "yPct": 33.182
+    },
+    {
+      "id": "tanah-abang",
+      "name": "Tanah Abang",
+      "code": "THB",
+      "kind": "hub",
+      "line": "Rangkasbitung / Cikarang",
+      "door": "Kanan",
+      "km": 0.0,
+      "note": "Hub transfer. Bisa lanjut ke BNI City / Sudirman.",
+      "label": "right",
+      "xPct": 72.042,
+      "yPct": 19.64
+    },
+    {
+      "id": "bni-city",
+      "name": "BNI City",
+      "code": "BNC",
+      "kind": "krl",
+      "line": "Cikarang",
+      "door": "Kanan",
+      "km": 0.0,
+      "note": "Terhubung ke Dukuh Atas dan MRT.",
+      "label": "right",
+      "xPct": 77.46,
+      "yPct": 29.324
+    },
+    {
+      "id": "sudirman",
+      "name": "Sudirman",
+      "code": "SUD",
+      "kind": "krl",
+      "line": "Cikarang",
+      "door": "Kanan",
+      "km": 0.0,
+      "note": "Turun di sini untuk SCBD dan Sudirman.",
+      "label": "right",
+      "xPct": 79.752,
+      "yPct": 29.821
+    },
+    {
+      "id": "scbd",
+      "name": "SCBD",
+      "code": "OFFICE",
+      "kind": "office",
+      "line": "Last mile",
+      "door": "—",
+      "km": 0.0,
+      "note": "Kantor. Tujuan akhir. Akhirnya.",
+      "label": "right",
+      "xPct": 71.309,
+      "yPct": 44.39
+    },
+    {
+      "id": "home",
+      "name": "Bintaro",
+      "kind": "home",
+      "label": "left",
+      "xPct": 16.225,
+      "yPct": 71.038
+    }
+  ],
+  "trainPath": "M218.4,823.7 C234.3,811.6 259.2,803.3 313.9,751.1 C368.5,698.9 492.5,580.4 546.3,510.5 C600.0,440.7 607.5,384.2 636.5,331.8 C665.5,279.5 697.4,202.8 720.4,196.4 C743.4,190.0 761.8,276.3 774.6,293.2 C787.5,310.2 793.7,297.4 797.5,298.2"
+}

@@ -1,0 +1,25 @@
+---
+const items = [
+  'Susahnya nyata',
+  'Dramanya gratis',
+  'Berangkat',
+  'Berjuang',
+  'Sampai',
+  'Gitu aja terus setiap hari',
+  'Drama ada-ada aja',
+  'Kursi kosong itu mitos',
+  'Gajian dulu',
+];
+---
+
+<div class="joke-ticker" aria-hidden="true">
+  <div class="joke-ticker-track">
+    {[0, 1].map((copy) => (
+      <div class="joke-ticker-group" data-copy={copy}>
+        {items.map((item) => (
+          <span class="joke-ticker-item">{item}<i>✦</i></span>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>

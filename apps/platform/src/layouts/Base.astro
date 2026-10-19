@@ -1,0 +1,91 @@
+---
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/inter';
+import '@fontsource/ibm-plex-mono/400.css';
+import '@fontsource/ibm-plex-mono/600.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noindex?: boolean;
+}
+
+const {
+  title = 'Pejuang Nafkah — game perjalanan pagi Jakarta',
+  description = 'Game satu tangan tentang perjalanan pagi di Jabodetabek. Motor, KRL, atau keduanya — dari Bintaro sampai Sudirman. Pre-alpha: pilih satu rute gratis; All Maps sekali bayar; Live di Fase 2. Susahnya nyata, dramanya gratis.',
+  image = '/images/og.jpg',
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://wniseries.ahaqqu.com');
+const ogImage = new URL(image, Astro.site ?? 'https://wniseries.ahaqqu.com');
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Pejuang Nafkah',
+  description,
+  url: canonical.toString(),
+  image: ogImage.toString(),
+  gamePlatform: 'Web browser',
+  genre: ['Simulation', 'Slice of life', 'Commute'],
+  applicationCategory: 'Game',
+  inLanguage: 'id-ID',
+  operatingSystem: 'Android, iOS, Windows, macOS, Linux',
+  publisher: {
+    '@type': 'Organization',
+    name: 'WNI Series',
+    email: 'wniseries@gmail.com',
+  },
+};
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#06111b" />
+    <meta name="color-scheme" content="dark" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={canonical} />}
+    <link rel="preload" as="image" href="/images/motor-900.webp" media="(max-width: 760px)" fetchpriority="high" />
+    <link rel="preload" as="image" href="/images/motor.webp" media="(min-width: 761px)" fetchpriority="high" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="WNI Series" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content="Pejuang Nafkah — pre-alpha commute game" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="id_ID" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content="Pejuang Nafkah — pre-alpha commute game" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#konten">Langsung ke konten</a>
+    <Header />
+    <main id="konten">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import '../scripts/motion';
+    </script>
+  </body>
+</html>

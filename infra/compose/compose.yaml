@@ -1,0 +1,102 @@
+# WNI Series — production compose (target).
+#
+# Usage on the VPS:
+#   cd /srv/wni
+#   docker compose --env-file .env -f compose.yaml up -d
+#
+# Assumptions:
+#   - Cloudflare Tunnel is used; no public 80/443 ports are published.
+#   - Static releases live in /srv/wni/current (symlink to releases/<sha>).
+#   - Secrets live in /srv/wni/.env (mode 600), never in this file.
+
+name: wni
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /srv/wni/current:/srv/wni/current:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge
+    depends_on:
+      api:
+        condition: service_healthy
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?set CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - edge
+    depends_on:
+      - caddy
+
+  api:
+    image: ghcr.io/ahaqqu/wni-api:${RELEASE_TAG:?set RELEASE_TAG}
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE:-.env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - edge
+      - data
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    user: '10001:10001'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3000/api/healthz || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wni
+      POSTGRES_USER: wni
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U wni -d wni']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    image: ghcr.io/ahaqqu/wni-api:${RELEASE_TAG:?set RELEASE_TAG}
+    command: ['node', 'dist/migrate.js']
+    env_file:
+      - ${ENV_FILE:-.env}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - data
+    profiles:
+      - migrate
+
+networks:
+  edge:
+  data:
+    internal: true
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

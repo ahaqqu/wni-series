@@ -1,0 +1,34 @@
+---
+import BrandMark from './BrandMark.astro';
+---
+
+<header class="site-header" data-header>
+  <div class="header-inner">
+    <a class="brand" href="/">
+      <BrandMark />
+      <span class="brand-copy">
+        <span class="brand-name">Pejuang Nafkah</span>
+        <span class="brand-series">WNI Series · #1</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" id="site-nav" aria-label="Navigasi utama">
+      <a href="/#rasa">Rasanya</a>
+      <a href="/#mode">Mode</a>
+      <a href="/#rute">Rute</a>
+      <a href="/#cara">Cara main</a>
+      <a href="/#drama">Drama</a>
+      <a href="/#harga">Harga</a>
+      <a class="menu-cta btn btn-primary" href="/#daftar">Daftar tunggu <span class="arrow" aria-hidden="true">→</span></a>
+    </nav>
+
+    <div class="header-actions">
+      <span class="header-status">Pre-alpha</span>
+      <a class="btn btn-primary btn-small" href="/#daftar">Daftar tunggu</a>
+      <button class="menu-toggle" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="site-nav" data-menu-toggle>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+</header>

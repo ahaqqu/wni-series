@@ -1,0 +1,46 @@
+<section class="waitlist-section" id="daftar" aria-labelledby="waitlist-title">
+  <div class="waitlist-inner">
+    <div class="waitlist-copy" data-reveal>
+      <div class="eyebrow">Ikut perjalanan pertama</div>
+      <h2 id="waitlist-title">Kami kabari<br />saat siap.</h2>
+      <p class="lede">
+        Satu email saat build awal bisa dicoba. Tidak ada spam, tidak ada jual data,
+        tidak ada “promo terbatas” palsu. Kamu bisa berhenti kapan saja.
+      </p>
+    </div>
+
+    <form class="waitlist-form" data-waitlist-form method="post" action="/api/v1/waitlist" novalidate data-reveal data-reveal-delay="1">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="nama@email.com" required maxlength="254" />
+      </div>
+      <label class="consent">
+        <input type="checkbox" name="consent" required />
+        <span>
+          Saya setuju dihubungi lewat email tentang kabar rilis Pejuang Nafkah. Saya sudah membaca{' '}
+          <a href="/privasi">kebijakan privasi</a>.
+        </span>
+      </label>
+      <div class="honeypot" aria-hidden="true">
+        <label for="website">Website</label>
+        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <button class="btn btn-primary" type="submit" data-waitlist-submit>
+        Daftar tunggu
+        <span class="arrow" aria-hidden="true">→</span>
+      </button>
+      <p class="form-status" data-form-status role="status" aria-live="polite"></p>
+      <p class="waitlist-micro">
+        Hanya email + status persetujuan yang disimpan. Tidak ada pelacakan iklan.
+        Ada pertanyaan? <a href="mailto:wniseries@gmail.com">wniseries@gmail.com</a>.
+      </p>
+      <noscript>
+        <p class="waitlist-micro">
+          JavaScript mati. Kirim email ke
+          <a href="mailto:wniseries@gmail.com?subject=Daftar%20tunggu%20Pejuang%20Nafkah">wniseries@gmail.com</a>
+          dengan subjek “Daftar tunggu Pejuang Nafkah”.
+        </p>
+      </noscript>
+    </form>
+  </div>
+</section>

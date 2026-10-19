@@ -1,0 +1,64 @@
+# WNI Series — origin Caddyfile (behind Cloudflare Tunnel or proxy)
+#
+# The public hostname is terminated at Cloudflare. This origin listens on :8080
+# and is never exposed directly. Static releases are served from /srv/wni/current.
+#
+# Adjust the CSP after the Phase 4/5 report-only rollout. Do not weaken it permanently.
+
+:8080 {
+	encode zstd gzip
+
+	# API — no cache, JSON, same-origin credentials.
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	# Game builds — one directory per game slug.
+	handle /play/* {
+		root * /srv/wni/current/play
+		try_files {path} {path}/ /404.html
+		file_server
+	}
+
+	# Hashed assets are immutable; HTML must revalidate.
+	@game_html path /play/*/ /play/*/index.html
+	header @game_html Cache-Control "no-cache"
+
+	# Only build-hashed platform assets are immutable. Public images/SVGs keep a
+	# short cache so a corrected map or scene can ship without a year-long purge.
+	@hashed_assets path /_astro/*
+	header @hashed_assets Cache-Control "public, max-age=31536000, immutable"
+
+	@platform_html path / /index.html /404.html /privasi /privasi/ /syarat /syarat/ /refund /refund/ /tentang /tentang/ /kontak /kontak/ /harga /harga/
+	header @platform_html Cache-Control "no-cache"
+
+	# Public immutable assets (optional; prefer R2/CDN for large packs).
+	handle /assets/* {
+		root * /srv/wni/current/assets
+		file_server
+		header Cache-Control "public, max-age=31536000, immutable"
+	}
+
+	# Platform (Astro static).
+	handle {
+		root * /srv/wni/current/platform
+		try_files {path} {path}/ /404.html
+		file_server
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-origin"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://assets.wniseries.ahaqqu.com; media-src 'self' blob: https://assets.wniseries.ahaqqu.com; font-src 'self'; connect-src 'self' https://assets.wniseries.ahaqqu.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'self' blob:; object-src 'none'; upgrade-insecure-requests"
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

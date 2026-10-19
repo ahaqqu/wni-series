@@ -1,0 +1,45 @@
+---
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Pre-alpha scene preview</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background:
+          radial-gradient(1100px 620px at 68% 16%, rgba(255, 158, 92, 0.42), transparent 58%),
+          radial-gradient(900px 500px at 20% 55%, rgba(42, 157, 143, 0.12), transparent 65%),
+          linear-gradient(180deg, #0a1b29 0%, #183747 46%, #6f4a3c 72%, #0b1b29 100%);
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <script>
+      import { initKrlScene, initStreetScene } from '../scripts/hero-scene';
+
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get('scene') === 'krl' ? 'krl' : 'motor';
+      const canvas = document.querySelector('#scene');
+      if (!(canvas instanceof HTMLCanvasElement)) throw new Error('canvas missing');
+      document.documentElement.dataset.scene = mode;
+      if (mode === 'krl') initKrlScene(canvas);
+      else initStreetScene(canvas);
+    </script>
+  </body>
+</html>

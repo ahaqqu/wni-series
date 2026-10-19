@@ -1,0 +1,16 @@
+{
+  "slug": "replace-me",
+  "title": "Replace Me",
+  "series": "WNI Series",
+  "version": "0.1.0",
+  "status": "concept",
+  "rating": "13+",
+  "modes": ["default"],
+  "freeContent": ["trial"],
+  "products": [],
+  "entry": "/play/replace-me/",
+  "contentSchemaVersion": 1,
+  "shortDescription": "One sentence. Keep the promise specific and honest.",
+  "tier": "free-core-plus-full-pass",
+  "repositoryDocs": "docs/games/replace-me"
+}

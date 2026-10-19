@@ -1,0 +1,12 @@
+node_modules
+dist
+.turbo
+.astro
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+artifacts
+docs/games/pejuang-nafkah/research/findings
+
+scripts/inspect-threejs-canvas.mjs

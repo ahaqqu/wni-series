@@ -1,0 +1,32 @@
+{
+  "name": "wni-series",
+  "private": true,
+  "version": "0.1.0",
+  "description": "WNI Series \u2014 Indonesian everyday-life games. First game: Pejuang Nafkah.",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=24 <27",
+    "pnpm": ">=12"
+  },
+  "scripts": {
+    "lint:docs": "markdownlint-cli2 \"docs/**/*.md\" \"README.md\" \"AGENTS.md\" \"SECURITY.md\" \".github/**/*.md\" \"artifacts/**/*.md\" \"games/**/*.md\" \"apps/**/*.md\" \"services/**/*.md\" \"packages/**/*.md\" \"data/**/*.md\" \"infra/**/*.md\"",
+    "check:links": "node scripts/check-internal-links.mjs",
+    "verify:scaffold": "node scripts/verify-scaffold.mjs",
+    "verify:docs": "pnpm lint:docs && pnpm check:links && pnpm verify:scaffold",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "build": "pnpm -r --if-present build",
+    "verify": "pnpm verify:docs && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "markdownlint-cli2": "0.23.3",
+    "prettier": "3.9.10",
+    "turbo": "2.11.9",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}

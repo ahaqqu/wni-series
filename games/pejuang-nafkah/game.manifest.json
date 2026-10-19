@@ -1,0 +1,20 @@
+{
+  "slug": "pejuang-nafkah",
+  "title": "Pejuang Nafkah",
+  "series": "WNI Series",
+  "version": "0.1.0",
+  "status": "design",
+  "rating": "13+",
+  "modes": ["krl", "motor", "multimodal"],
+  "freeContent": ["bintaro-sudirman"],
+  "products": ["pn-full-pass", "pn-cosmetic-*", "pn-supporter-bundle"],
+  "entry": "/play/pejuang-nafkah/",
+  "contentSchemaVersion": 1,
+  "shortDescription": "A one-hand commute game set on the real roads, trains, and mornings of Jakarta.",
+  "tier": "free-core-plus-full-pass",
+  "priceIdr": {
+    "fullPass": 39000,
+    "supporterBundle": 69000
+  },
+  "repositoryDocs": "docs/games/pejuang-nafkah"
+}

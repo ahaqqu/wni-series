@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+# Binary assets — add Git LFS only when the asset pipeline is finalised.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.glb binary
+*.gltf binary
+*.ktx2 binary
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.mp4 binary
