@@ -1,0 +1,94 @@
+<section class="section modes-section" id="mode" aria-labelledby="modes-title">
+  <div class="section-inner">
+    <div class="section-head">
+      <div data-reveal>
+        <div class="eyebrow">Dua cara, satu tujuan</div>
+        <h2 id="modes-title">Motor atau KRL.<br />Kadang dua-duanya.</h2>
+      </div>
+      <p class="lede" data-reveal data-reveal-delay="1">
+        Tidak ada mode yang “benar”. Ada waktu, uang, tenaga, dan keberanian yang berbeda.
+        Pilih ritme yang paling masuk akal pagi itu — lalu hadapi konsekuensinya.
+      </p>
+    </div>
+
+    <div class="mode-tabs" role="tablist" aria-label="Mode perjalanan">
+      <button class="mode-tab" type="button" role="tab" id="tab-motor" aria-controls="panel-motor" aria-selected="true" tabindex="0" data-mode-tab="motor">Motor · Selip</button>
+      <button class="mode-tab" type="button" role="tab" id="tab-krl" aria-controls="panel-krl" aria-selected="false" tabindex="-1" data-mode-tab="krl">KRL · Berdesakan</button>
+      <button class="mode-tab" type="button" role="tab" id="tab-multimodal" aria-controls="panel-multimodal" aria-selected="false" tabindex="-1" data-mode-tab="multimodal">Multimodal · Satu hari</button>
+    </div>
+
+    <div class="mode-panel">
+      <div class="mode-stage" data-mode-stage>
+        <img class="mode-image is-active" data-mode-image="motor" src="/images/motor-960.webp" srcset="/images/motor-960.webp 960w, /images/motor.webp 1600w" sizes="(max-width: 900px) 100vw, 800px" alt="Visual pre-alpha jalan Jakarta saat hujan, dengan motor, mobil, angkot, dan busway." width="1600" height="1000" loading="lazy" decoding="async" />
+        <img class="mode-image" data-mode-image="krl" src="/images/krl-960.webp" srcset="/images/krl-960.webp 960w, /images/krl.webp 1600w" sizes="(max-width: 900px) 100vw, 800px" alt="Visual pre-alpha peron KRL Jurangmangu dengan kereta dan penumpang." width="1600" height="1000" loading="lazy" decoding="async" />
+        <div class="mode-image mode-diagram" data-mode-image="multimodal" aria-hidden="true">
+          <div class="mm-diagram">
+            <div class="mm-node"><span>01</span><strong>Motor</strong><small>rumah → stasiun</small></div>
+            <div class="mm-line"><i></i></div>
+            <div class="mm-node is-hot"><span>02</span><strong>KRL</strong><small>stasiun → kota</small></div>
+            <div class="mm-line"><i></i></div>
+            <div class="mm-node is-teal"><span>03</span><strong>Jalan</strong><small>kota → kantor</small></div>
+          </div>
+        </div>
+
+        <div class="mode-stage-label">
+          <span>Pre-alpha visual target</span>
+          <span>Bukan gameplay final</span>
+        </div>
+        <div class="mode-stage-caption">
+          <div>
+            <strong data-mode-caption-title>Selip. Rem. Gas. Ulang.</strong>
+            <span data-mode-caption-sub>Baca celah. Hindari angkot. Jangan masuk busway.</span>
+          </div>
+          <span class="stage-index" data-mode-index>01 / 03</span>
+        </div>
+      </div>
+
+      <div class="mode-copy">
+        <div role="tabpanel" id="panel-motor" aria-labelledby="tab-motor" data-mode-panel="motor">
+          <h3>“Cepat belum tentu sampai.”</h3>
+          <p>
+            Kamu tahu lane mana yang bergerak, lampu mana yang panjang, dan celah mana yang
+            cukup. Filtering itu cepat — sampai ada angkot yang berhenti mendadak.
+          </p>
+          <ul class="mode-facts">
+            <li><span>Ritme</span><span>14–25 km/jam di padat merayap</span></li>
+            <li><span>Hazard utama</span><span>Angkot, ojol, busway, banjir</span></li>
+            <li><span>Kontrol</span><span>Geser · tahan rem</span></li>
+            <li><span>Risiko</span><span>Nabrak, tilang, basah</span></li>
+          </ul>
+        </div>
+        <div role="tabpanel" id="panel-krl" aria-labelledby="tab-krl" data-mode-panel="krl" hidden>
+          <h3>“Berdesakan. Tapi semua mau sampai.”</h3>
+          <p>
+            Pintu terbuka sebentar. Kamu harus memilih: masuk, tunggu, atau cari gerbong lain.
+            Di dalam, yang paling sulit kadang cuma berdiri dan tetap tenang.
+          </p>
+          <ul class="mode-facts">
+            <li><span>Ritme</span><span>Headway 3–15 menit, door timer</span></li>
+            <li><span>Hazard utama</span><span>Berdesakan, jatuh, ketinggalan</span></li>
+            <li><span>Kontrol</span><span>Geser · tahan pegangan</span></li>
+            <li><span>Risiko</span><span>Telat, harga diri, kaki pegal</span></li>
+          </ul>
+        </div>
+        <div role="tabpanel" id="panel-multimodal" aria-labelledby="tab-multimodal" data-mode-panel="multimodal" hidden>
+          <h3>“Tiga ritme, satu napas.”</h3>
+          <p>
+            Motor ke stasiun, KRL ke kota, jalan kaki ke kantor. Waktu, uang, dan tenaga
+            berpindah bersama kamu. Tidak ada rute yang sempurna.
+          </p>
+          <ul class="mode-facts">
+            <li><span>Rute</span><span>Bintaro → Sudirman → SCBD</span></li>
+            <li><span>Handoff</span><span>Parkir, tap, transfer, last mile</span></li>
+            <li><span>Kontrol</span><span>Geser · tahan · tap</span></li>
+            <li><span>Risiko</span><span>Ketinggalan, boncos, capek</span></li>
+          </ul>
+        </div>
+        <div class="mode-controls-note">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="5" y="2" width="8" height="14" rx="2" stroke="currentColor"/><path d="M9 12.5v1" stroke="currentColor" stroke-linecap="round"/></svg>
+          <span>Target desain: semua mode dapat dimainkan satu tangan, portrait, dan dijeda kapan saja.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,147 @@
+---
+import routeData from '../data/route-map.json';
+
+const stations = routeData.stations.filter((station) => station.kind !== 'home');
+const home = routeData.stations.find((station) => station.kind === 'home');
+---
+
+<section class="section route-section" id="rute" aria-labelledby="route-title">
+  <div class="section-inner">
+    <div class="section-head">
+      <div data-reveal>
+        <div class="eyebrow">Rute yang benar-benar ada</div>
+        <h2 id="route-title">Bintaro ke SCBD.<br />Bukan karangan.</h2>
+      </div>
+      <p class="lede" data-reveal data-reveal-delay="1">
+        Jurangmangu, Pondok Ranji, Kebayoran, Palmerah, Tanah Abang, BNI City, Sudirman.
+        Nama dan urutannya mengikuti data publik 2026. Peta ini digambar dari OpenStreetMap.
+      </p>
+    </div>
+
+    <div class="route-layout">
+      <div data-reveal>
+        <div class="map-frame" aria-describedby="map-help">
+          <div class="map-svg-slot" data-map-svg aria-hidden="true">
+            <noscript>
+              <img src="/images/route-map.svg" alt="Peta rute Jurangmangu ke Sudirman" width="1000" height="1000" />
+            </noscript>
+          </div>
+          <div class="map-stations" data-map-stations>
+            {home && (
+              <button
+                class="map-station"
+                type="button"
+                data-station
+                data-kind="home"
+                data-name={home.name}
+                data-code={home.code}
+                data-note="Titik awal. Rumah. Masih hangat."
+                data-door="—"
+                style={`left:${home.xPct}%;top:${home.yPct}%`}
+                aria-label={`${home.name}, titik awal`}
+              >
+                <span class="dot"></span>
+                <span class="station-name">{home.name}</span>
+              </button>
+            )}
+            {stations.map((station) => (
+              <button
+                class:list={['map-station', station.xPct > 70 && 'is-left']}
+                type="button"
+                data-station
+                data-kind={station.kind}
+                data-name={station.name}
+                data-code={station.code}
+                data-note={station.note}
+                data-door={station.door}
+                style={`left:${station.xPct}%;top:${station.yPct}%`}
+                aria-label={`${station.name} (${station.code})`}
+              >
+                <span class="dot"></span>
+                <span class="station-name">{station.name}</span>
+                <span class="station-code">{station.code}</span>
+              </button>
+            ))}
+          </div>
+          <div class="map-tooltip" data-map-tooltip aria-live="polite">
+            <div class="tooltip-top">
+              <strong data-tooltip-name>Jurangmangu</strong>
+              <span class="tooltip-code" data-tooltip-code>JMU</span>
+            </div>
+            <p data-tooltip-note>Stasiun side platform, dekat Bintaro Xchange.</p>
+          </div>
+        </div>
+        <div class="map-legend" aria-label="Legenda peta">
+          <span><i></i> Rangkasbitung</span>
+          <span><i class="red"></i> Transfer Cikarang</span>
+          <span><i class="teal"></i> Last mile</span>
+          <span><i class="rail"></i> Rel lain</span>
+        </div>
+        <p class="map-credit">
+          © OpenStreetMap contributors, ODbL · Data diambil 18 Okt 2026 · Peta bergaya, bukan navigasi.
+          <span class="map-tap-note">Tap stasiun untuk detail.</span>
+        </p>
+        <span class="sr-only" id="map-help">Pilih stasiun untuk melihat catatan singkat.</span>
+      </div>
+
+      <div class="route-panel" data-reveal data-reveal-delay="1">
+        <h2>Rute pertama.</h2>
+        <p class="lede">
+          Gratis untuk dimainkan nanti. Satu pagi, dua mode, satu transfer. Cukup untuk
+          merasakan apakah ini terasa seperti perjalananmu.
+        </p>
+        <ol class="route-list">
+          <li>
+            <span class="stop-dot">A</span>
+            <div><strong>Bintaro</strong><small>Rumah · 05:12</small></div>
+            <span class="stop-meta">START</span>
+          </li>
+          <li>
+            <span class="stop-dot">01</span>
+            <div><strong>Jurangmangu</strong><small>JMU · Rangkasbitung · pintu kanan</small></div>
+            <span class="stop-meta">15,3 KM</span>
+          </li>
+          <li>
+            <span class="stop-dot">02</span>
+            <div><strong>Pondok Ranji</strong><small>Parkir motor · ojek langganan</small></div>
+            <span class="stop-meta">13,1 KM</span>
+          </li>
+          <li>
+            <span class="stop-dot">03</span>
+            <div><strong>Kebayoran</strong><small>Mulai berdiri · 06:25</small></div>
+            <span class="stop-meta">6,9 KM</span>
+          </li>
+          <li>
+            <span class="stop-dot">04</span>
+            <div><strong>Palmerah</strong><small>Satu stasiun lagi</small></div>
+            <span class="stop-meta">3,1 KM</span>
+          </li>
+          <li class="is-hub">
+            <span class="stop-dot">05</span>
+            <div><strong>Tanah Abang</strong><small>Transfer · 155k+ penumpang/hari</small></div>
+            <span class="stop-meta">HUB</span>
+          </li>
+          <li>
+            <span class="stop-dot">06</span>
+            <div><strong>BNI City</strong><small>Karet sudah tutup · turun di sini</small></div>
+            <span class="stop-meta">CIKARANG</span>
+          </li>
+          <li>
+            <span class="stop-dot">07</span>
+            <div><strong>Sudirman</strong><small>Dukuh Atas · MRT/LRT/TJ</small></div>
+            <span class="stop-meta">07:41</span>
+          </li>
+          <li class="is-last">
+            <span class="stop-dot">08</span>
+            <div><strong>SCBD</strong><small>Last mile · jalan/ojek</small></div>
+            <span class="stop-meta">08:29</span>
+          </li>
+        </ol>
+        <div class="route-note">
+          <span aria-hidden="true">◈</span>
+          <span><strong>Data, bukan janji.</strong> Tarif, urutan stasiun, dan sisi pintu diverifikasi ulang sebelum rilis. Jadwal bisa berubah; game memakai snapshot berversi.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-and-scaffold:
+    name: Docs & scaffold
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.14.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm verify:docs
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  code:
+    name: Lint, types, unit, build (when apps exist)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.14.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint
+        if: ${{ hashFiles('apps/*/package.json', 'services/*/package.json', 'packages/*/package.json', 'games/*/package.json') != '' }}
+        run: pnpm lint
+      - name: Typecheck
+        if: ${{ hashFiles('apps/*/package.json', 'services/*/package.json', 'packages/*/package.json', 'games/*/package.json') != '' }}
+        run: pnpm typecheck
+      - name: Unit tests
+        if: ${{ hashFiles('apps/*/package.json', 'services/*/package.json', 'packages/*/package.json', 'games/*/package.json') != '' }}
+        run: pnpm test
+      - name: Build
+        if: ${{ hashFiles('apps/*/package.json', 'services/*/package.json', 'packages/*/package.json', 'games/*/package.json') != '' }}
+        run: pnpm build
+
+  # Dependency review is intentionally off until the repo has a dependency graph
+  # and GitHub Advanced Security (or a public repo) is confirmed.
+  # - name: Dependency review
+  #   uses: actions/dependency-review-action@v4
+  #   with:
+  #     fail-on-severity: high

@@ -1,0 +1,23 @@
+# Gitleaks configuration for WNI Series.
+# Examples and placeholders are not secrets; real values must never be committed.
+
+title = "WNI Series"
+
+[allowlist]
+description = "Documentation and example placeholders"
+paths = [
+  '''\.env\.example$''',
+  '''docs/.*\.md$''',
+  '''README\.md$''',
+  '''AGENTS\.md$''',
+  '''SECURITY\.md$''',
+  '''infra/.*\.md$''',
+  '''scripts/backup-postgres\.sh$''',
+]
+
+regexes = [
+  '''re_replace_me''',
+  '''replace-me''',
+  '''D0000''',
+  '''<account-id>''',
+]

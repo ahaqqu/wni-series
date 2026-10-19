@@ -1,3 +1,49 @@
+# dependencies
 node_modules/
+.pnpm-store/
+
+# builds
 dist/
+build/
+.astro/
+.turbo/
+out/
+
+# tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.nyc_output/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!.github/keys/README.md
+
+# generated evidence: reports/checklists are committed, screenshots/JSON stay local
+artifacts/*
+!artifacts/README.md
+!artifacts/verification/
+artifacts/verification/**
+!artifacts/verification/**/
+!artifacts/verification/**/report.md
+!artifacts/verification/**/*-report.md
+!artifacts/verification/**/checklist.md
+
+# data / local
+data/raw/*
+!data/raw/README.md
+data/tmp/
 *.log
+*.sqlite
+*.db
+.DS_Store
+Thumbs.db
+
+# tooling
+.eslintcache
+*.tsbuildinfo

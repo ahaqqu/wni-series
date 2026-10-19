@@ -1,0 +1,65 @@
+---
+import BrandMark from './BrandMark.astro';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <BrandMark />
+        <div>
+          <div class="brand-name">Pejuang Nafkah</div>
+          <div class="brand-series">WNI Series · Game #1</div>
+        </div>
+        <p>
+          Game satu tangan tentang perjalanan pagi di Jabodetabek. Motor, KRL, atau keduanya.
+          Dibuat untuk orang yang tahu arti “berangkat lebih awal”.
+        </p>
+        <p class="footer-motto"><strong>Susahnya nyata. Lucunya gratis.</strong><br /><span>WNI Series</span></p>
+      </div>
+
+      <div class="footer-links">
+        <div class="footer-col">
+          <h3>Game</h3>
+          <ul>
+            <li><a href="/#mode">Mode</a></li>
+            <li><a href="/#rute">Rute</a></li>
+            <li><a href="/#cara">Cara main</a></li>
+            <li><a href="/#harga">Harga</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Info</h3>
+          <ul>
+            <li><a href="/#tanya">FAQ</a></li>
+            <li><a href="/tentang">Tentang</a></li>
+            <li><a href="/kontak">Kontak</a></li>
+            <li><a href="/#daftar">Daftar tunggu</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h3>Legal</h3>
+          <ul>
+            <li><a href="/privasi">Privasi</a></li>
+            <li><a href="/syarat">Syarat</a></li>
+            <li><a href="/refund">Refund</a></li>
+            <li><a href="mailto:wniseries@gmail.com">wniseries@gmail.com</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© {year} WNI Series. Dibuat di Jakarta.</span>
+      <span>Data peta © OpenStreetMap contributors, ODbL.</span>
+      <a href="mailto:wniseries@gmail.com">wniseries@gmail.com</a>
+    </div>
+
+    <p class="footer-disclaimer">
+      Pejuang Nafkah adalah karya fiksi. Nama jalan dan stasiun digunakan secara deskriptif.
+      Proyek ini tidak berafiliasi dengan PT KAI, KAI Commuter, TransJakarta, atau merek transportasi
+      lain. Visual di halaman ini adalah target pre-alpha, bukan gameplay final.
+    </p>
+  </div>
+</footer>

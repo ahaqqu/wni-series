@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        patterns:
+          - 'prettier*'
+          - 'markdownlint*'
+          - 'turbo'
+          - 'typescript'
+          - 'vitest'
+          - '@playwright/test'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker
+    directory: /infra/compose
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
