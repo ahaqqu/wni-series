@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-19
 **Current phase:** Phase 0 — foundation + pre-alpha landing page
-**Implementation:** landing page + waitlist API implemented; game/checkout/auth not started; v4 pricing/live-data design and v4.2 brand/drama direction implemented on the landing page, not in-game
+**Implementation:** landing page + waitlist API implemented; game/checkout/auth not started; v4 pricing/live-data design and v4.3 brand/drama + daily-pipeline design documented; landing reflects v4.2, not in-game
 
 ## 1. What exists now
 
@@ -11,6 +11,9 @@
 - [design.md](design.md) — dual mode, one-hand UX, systems, art, web/motion, monetization.
 - [brand.md](brand.md) — series/game slogans, drama engine, Bang Nafkah, humour guardrails.
 - [ADR-0005](../../adr/0005-drama-system.md) — drama is core, rare, real-basis, fictionalised, fair, shareable; source bank + sensitivity review gate content lock.
+- [ADR-0006](../../adr/0006-daily-drama-pipeline.md) — daily AI research/draft, owner approval per card/pack, no auto-publish, anonymous, signed packs, fallback.
+- [Daily drama research plan](research/2026-10-daily-drama-pipeline.md) — source/ToS, AI terms, legal/privacy, approval dry run, cost; **not run**.
+- [Daily drama runbook](../../runbooks/daily-drama.md) — review checklist, publish, rollback/correction, failure, kill switches.
 - [Drama research/source-bank plan](research/2026-10-drama-system.md) — draft; no approved cards yet.
 - [research/PROTOCOL.md](research/PROTOCOL.md) — mandatory research-first gate; [ADR index](../../adr/README.md) with ADR-0001.
 - [Phase 1 research pre-flight plan](research/2026-10-phase-1-research-plan.md) — draft; no Phase 1 implementation until the gate is green.
@@ -33,6 +36,7 @@
 | Branding     | Real place names; original branding; no official logos/trade dress; voice/slogans in `brand.md`                       |
 | Voice        | “Susahnya nyata, dramanya gratis.” / “Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.”; Bang Nafkah narrator |
 | Drama        | Core, rare (~1 in 5 runs), real-basis + fictionalised, fair, shareable; never paid; no real recent tragedy/victims    |
+| Daily drama  | 00:00 WIB AI research/draft; owner approves every card + pack; no auto-publish; anonymous; signed; fallback; Phase 2D |
 | Mayar        | Personal merchant; sandbox until KYC; invoice/payment request + SaaS membership                                       |
 | Host         | `wniseries.ahaqqu.com`, netcup 2 vCPU/4 GB/100+ GB, Cloudflare edge                                                   |
 | Stack        | Astro + Vite/Three.js + Fastify + Postgres + Better Auth + Drizzle                                                    |
@@ -70,7 +74,8 @@
 3. Run the Phase 0 spikes (Mayar one-time + subscription, Three.js, sim, auth, deploy).
 4. Fill the remaining Phase 0 gate items with evidence.
 5. Start Phase 1: free-route vertical slice — KRL first, then motor + multimodal + last mile on the chosen route.
-6. Phase 2 adds All Maps/accounts/Mayar + live data/Live subscription/planner; Phase 3 adds Bandung/Surabaya/Yogyakarta candidates.
+6. Before Phase 2D, run the daily-drama research: source/ToS, AI provider, legal/privacy, 5-day approval dry run, cost; keep `AUTO_PUBLISH_DAILY_DRAMA=false`.
+7. Phase 2 adds All Maps/accounts/Mayar + live data/Live subscription/planner; Phase 3 adds Bandung/Surabaya/Yogyakarta candidates.
 
 ## 5. Known issues / risks
 
@@ -81,6 +86,7 @@
 - Green Line 12-car/Gapeka changes may alter content after 2026-11-01.
 - No playable build, no checkout/auth, no live-data implementation, no live deployment.
 - No public KRL/TransJakarta live crowding/position API; Phase 2 must label crowding as estimate unless a partnership is signed.
+- Daily drama is design-only: no source/ToS, AI provider, legal/privacy review, approval UI, dry run, or cost model. No auto-publish path exists; nothing is scheduled.
 - Drama bank is not built: no source log, no approved cards, no sensitivity review, no frequency test. Content lock is blocked until those exist (ADR-0005).
 - Share card is design-only; no upload/feed/UGC. The HTML mock on the landing page is labelled as a target, not a feature.
 - TomTom/PetaBencana commercial terms and budgets still need written confirmation.
@@ -92,14 +98,15 @@
 
 ## 6. Evidence
 
-| Date       | Phase | Evidence                                                                                                                            |
-| ---------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-10-18 | 0     | Docs + scaffold; run `pnpm verify:docs`                                                                                             |
-| 2026-10-18 | 0.5   | Landing page + waitlist; see `artifacts/verification/landing/2026-10-18/` and `artifacts/verification/phase-0/2026-10-18/report.md` |
-| 2026-10-19 | 0     | v4 Mayar/live-data research/docs; landing v4 copy + Lighthouse: `artifacts/verification/landing/2026-10-19/report.md`               |
-| 2026-10-19 | 0.5   | v4.1 brand/slogans + humour theme: `artifacts/verification/landing/2026-10-19/brand-report.md`                                      |
-| 2026-10-19 | 0     | Research-first protocol + ADR-0001; `docs/games/pejuang-nafkah/research/PROTOCOL.md`, `docs/adr/`                                   |
-| 2026-10-19 | 0.5   | v4.2 drama/slogan update + landing drama section: `artifacts/verification/landing/2026-10-19/drama-report.md`                       |
+| Date       | Phase | Evidence                                                                                                                                                                 |
+| ---------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-10-18 | 0     | Docs + scaffold; run `pnpm verify:docs`                                                                                                                                  |
+| 2026-10-18 | 0.5   | Landing page + waitlist; see `artifacts/verification/landing/2026-10-18/` and `artifacts/verification/phase-0/2026-10-18/report.md`                                      |
+| 2026-10-19 | 0     | v4 Mayar/live-data research/docs; landing v4 copy + Lighthouse: `artifacts/verification/landing/2026-10-19/report.md`                                                    |
+| 2026-10-19 | 0.5   | v4.1 brand/slogans + humour theme: `artifacts/verification/landing/2026-10-19/brand-report.md`                                                                           |
+| 2026-10-19 | 0     | Research-first protocol + ADR-0001; `docs/games/pejuang-nafkah/research/PROTOCOL.md`, `docs/adr/`                                                                        |
+| 2026-10-19 | 0.5   | v4.2 drama/slogan update + landing drama section: `artifacts/verification/landing/2026-10-19/drama-report.md`                                                            |
+| 2026-10-19 | 0     | v4.3 daily drama pipeline: `docs/adr/0006-daily-drama-pipeline.md`, `docs/games/pejuang-nafkah/research/2026-10-daily-drama-pipeline.md`, `docs/runbooks/daily-drama.md` |
 
 ## 7. Design/plan review — v2 → v3
 
@@ -136,6 +143,14 @@ The previous design/plan were strong on authenticity but under-specified as a sh
 - [Drama research/source-bank plan](research/2026-10-drama-system.md) lists the work still needed: source log (≥2 per family), location allow-list, sensitivity review, 10–15 cards, frequency/fairness test, share test.
 - Design: [design.md](design.md) §5.11; requirements: `specs.md` DRAMA-01…10; Phase 1 tasks 1.6a–1.6c, 1.23–1.25.
 - **Status:** direction and landing copy only. No source bank, no approved cards, no in-game drama, no share feature.
+
+## 8B. Daily drama direction — v4.3
+
+- User direction (2026-10-19): **daily drama**, researched by an agent every midnight Asia/Jakarta from a viral event today/yesterday/last few days; creatively written into gameplay; the owner can receive many candidates, choose, comment, request regeneration, and approve again; **no production publish without approval**.
+- [ADR-0006](../../adr/0006-daily-drama-pipeline.md): candidate-only 00:00 job; source allowlist/no social scraping; anonymous; 3–10 candidates; per-card + pack approval; no auto-publish; signed immutable packs; evergreen fallback; audit/correction.
+- [Architecture §10B](architecture.md) defines generator/publish/owner roles, state machine, DB tables, endpoints, pack format, security, alerts.
+- [Plan Phase 2D](plan.md) adds research gate, review UI, pack pipeline, dry run, and exit gate.
+- **Status:** design and docs only. No source/AI provider selected; no legal/privacy review; no approval UI; no dry run; no schedule; nothing can publish.
 
 ## 9. Research-first adoption
 

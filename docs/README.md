@@ -18,11 +18,11 @@ WNI Series is a multi-game platform. Each game has its own folder under `docs/ga
 
 ## Shared docs
 
-| Doc                                                    | Purpose                                                         |
-| ------------------------------------------------------ | --------------------------------------------------------------- |
-| [verification/README.md](verification/README.md)       | Test tiers, evidence contract, agent self-verification protocol |
-| [runbooks/README.md](runbooks/README.md)               | Deploy, payments, backup/restore, incident, privacy request     |
-| [games/_template/README.md](games/_template/README.md) | How to start game #2 without forking the platform               |
+| Doc                                                    | Purpose                                                                             |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [verification/README.md](verification/README.md)       | Test tiers, evidence contract, agent self-verification protocol                     |
+| [runbooks/README.md](runbooks/README.md)               | Deploy, payments, live data, daily drama, backup/restore, incident, privacy request |
+| [games/_template/README.md](games/_template/README.md) | How to start game #2 without forking the platform                                   |
 
 ## Reading order
 

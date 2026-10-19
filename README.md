@@ -31,6 +31,7 @@ Pejuang Nafkah is a 3D web game about getting to work in Greater Jakarta. You pl
 - **All Maps:** every Pejuang Nafkah map, including future Phase 3 cities — one-time, Rp 79,000.
 - **Drama, but rarely:** real-basis, fictionalised floods/demos/accidents/queue fights; rare enough to be a story, fair enough to retell, met with “bercanda dulu, panik belakangan”.
 - **Made to share:** a local “Cerita hari ini” report card and share image; no feed, no upload, no PII.
+- **Daily drama, human-approved:** midnight WIB AI research/drafts, owner approval per card and pack, no auto-publish; anonymous, source-checked, with evergreen fallback. [ADR-0006](docs/adr/0006-daily-drama-pipeline.md).
 - **Live:** Rp 49,000/month (Phase 2) for all maps + live traffic/weather/incidents, estimated crowding, and a real-trip planner; no fake live labels.
 - **Real places, original branding:** real station/road names; no official logos or copied announcements.
 - **Secure payments:** Mayar hosted checkout + SaaS membership; server-side entitlements; callbacks verified via Mayar API; reconciliation/refunds/cancellation.
@@ -129,6 +130,7 @@ See [architecture.md](docs/games/pejuang-nafkah/architecture.md) §14 and [deplo
 | Branding     | Real place names; original branding; no official logos/trade dress; voice/slogans in `brand.md` |
 | Tone         | Dry, warm, self-deprecating; “Susahnya nyata, dramanya gratis.”; never punching down            |
 | Drama        | Rare (~1 in 5 runs), real-basis + fictionalised, fair/shareable, never paid, no real victims    |
+| Daily drama  | 00:00 WIB AI research/draft, owner approval, no auto-publish, anonymous, signed packs, fallback |
 | Mayar entity | Personal merchant assumed; production only after KYC                                            |
 | Host         | `wniseries.ahaqqu.com` on existing netcup VPS + Cloudflare                                      |
 | Stack        | Astro + Vite/Three.js + Fastify + PostgreSQL + Better Auth + Mayar + TomTom/BMKG                |

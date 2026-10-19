@@ -1,9 +1,9 @@
 # plan.md — Pejuang Nafkah delivery plan
 
 **Phase-by-phase delivery with end-to-end verification**
-**Version:** 4.2
+**Version:** 4.3
 **Date:** 2026-10-19
-**Status:** Phase 0 + pre-alpha landing page implemented locally; game/checkout not started; Phase 0 gate pending access/spikes. v4 pricing: Free one route / All Maps Rp 79k / Live Rp 49k-month (Phase 2); Phase 3 cities.
+**Status:** Phase 0 + pre-alpha landing page implemented locally; game/checkout not started; Phase 0 gate pending access/spikes. v4 pricing: Free one route / All Maps Rp 79k / Live Rp 49k-month (Phase 2); daily drama Phase 2D; Phase 3 cities.
 **Target host:** `https://wniseries.ahaqqu.com` (netcup VPS + Cloudflare edge)
 **Companion docs:** [specs.md](specs.md) · [design.md](design.md) · [brand.md](brand.md) · [architecture.md](architecture.md) · [research protocol](research/PROTOCOL.md) · [ADR index](../../adr/README.md) · [live-data/Mayar research](research/2026-10-live-data-and-mayar.md)
 
@@ -49,19 +49,19 @@
 
 ## 3. Phase overview
 
-| Phase | Name                                | Goal                                                                                            | Duration (solo full-time) | Hard exit gate                                                                |
-| ----- | ----------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------- |
-| **0** | Foundation & truth                  | Lock decisions, data, stack, infra, test harness                                                | 2–3 weeks                 | Docs approved; spikes pass; staging URL; CI green                             |
-| **1** | Free-route vertical slice           | One chosen route: KRL first, then motor + multimodal + last mile                                | 8–12 weeks                | Full free route; 60 fps; one-hand ≥90%; recognition ≥80%; offline             |
-| **2** | Commute core + Live + subscriptions | 2A All Maps/accounts/Mayar; 2B live data + Live subscription + planner; 2C daily/meta/retention | 11–15 weeks               | All Maps + Live sandbox E2E; deterministic live snapshot; cost caps; playtest |
-| **3** | Other cities                        | Bandung, Surabaya, Yogyakarta (candidates); data/licence/copy per city                          | 8–12 weeks                | Per-city recognition; traffic/weather coverage; cost gate                     |
-| **4** | Platform web & account              | Game page, account, checkout UX, support, devlog; landing already exists                        | 3–4 weeks                 | Lighthouse; auth/account E2E; accessibility                                   |
-| **5** | Security & payment hardening        | Mayar reconciliation, refunds/cancellation, privacy, pen test, load                             | 4–6 weeks                 | 0 critical/high; reconciliation clean; KYC/tax approved                       |
-| **6** | Content & accessibility expansion   | Story, audio, cosmetics, localization, browser/device matrix                                    | 4–6 weeks                 | Content lock; a11y gates; performance                                         |
-| **7** | Polish & launch                     | Soft launch, launch checklist, incident readiness                                               | 3–4 weeks                 | Launch checklist; no P0/P1; live payments verified                            |
-| **8** | Post-launch                         | Content cadence, metrics, next game                                                             | Ongoing                   | Stable, measured, sustainable                                                 |
+| Phase | Name                                | Goal                                                                                                                     | Duration (solo full-time) | Hard exit gate                                                                                         |
+| ----- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **0** | Foundation & truth                  | Lock decisions, data, stack, infra, test harness                                                                         | 2–3 weeks                 | Docs approved; spikes pass; staging URL; CI green                                                      |
+| **1** | Free-route vertical slice           | One chosen route: KRL first, then motor + multimodal + last mile                                                         | 8–12 weeks                | Full free route; 60 fps; one-hand ≥90%; recognition ≥80%; offline                                      |
+| **2** | Commute core + Live + subscriptions | 2A All Maps/accounts/Mayar; 2B live data + Live subscription + planner; 2C daily/meta/retention; 2D daily drama pipeline | 15–21 weeks               | All Maps + Live sandbox E2E; deterministic live snapshot; daily approval/fallback; cost caps; playtest |
+| **3** | Other cities                        | Bandung, Surabaya, Yogyakarta (candidates); data/licence/copy per city                                                   | 8–12 weeks                | Per-city recognition; traffic/weather coverage; cost gate                                              |
+| **4** | Platform web & account              | Game page, account, checkout UX, support, devlog; landing already exists                                                 | 3–4 weeks                 | Lighthouse; auth/account E2E; accessibility                                                            |
+| **5** | Security & payment hardening        | Mayar reconciliation, refunds/cancellation, privacy, pen test, load                                                      | 4–6 weeks                 | 0 critical/high; reconciliation clean; KYC/tax approved                                                |
+| **6** | Content & accessibility expansion   | Story, audio, cosmetics, localization, browser/device matrix                                                             | 4–6 weeks                 | Content lock; a11y gates; performance                                                                  |
+| **7** | Polish & launch                     | Soft launch, launch checklist, incident readiness                                                                        | 3–4 weeks                 | Launch checklist; no P0/P1; live payments verified                                                     |
+| **8** | Post-launch                         | Content cadence, metrics, next game                                                                                      | Ongoing                   | Stable, measured, sustainable                                                                          |
 
-**Full-time estimate:** ~40–60 weeks to v1. **Part-time:** 1.5–2×. The gates are fixed; calendar time depends on availability. Live/subscription scope is deliberately in Phase 2; do not compress by skipping verification.
+**Full-time estimate:** ~44–66 weeks to v1. **Part-time:** 1.5–2×. The gates are fixed; calendar time depends on availability. Live/subscription scope is deliberately in Phase 2; do not compress by skipping verification.
 
 ### 3.1 Research pre-flight (every phase)
 
@@ -220,9 +220,9 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 
 ---
 
-### Phase 2 — Commute core + Live + subscriptions (11–15 weeks)
+### Phase 2 — Commute core + Live + subscriptions + daily drama (15–21 weeks)
 
-**Goal:** turn the free-route game into the actual product: All Maps, accounts, Mayar one-time checkout, live data, the Live subscription, and a planner that is useful for the real commute. This is the phase the user explicitly asked for; it is split into three gates so a failure in live data cannot block the maps/revenue work.
+**Goal:** turn the free-route game into the actual product: All Maps, accounts, Mayar one-time checkout, live data, the Live subscription, and a planner that is useful for the real commute. This is the phase the user explicitly asked for; it is split into four gates so a failure in live data or daily content cannot block the maps/revenue work.
 
 #### 2A — All Maps, accounts, and Mayar one-time (3–4 weeks)
 
@@ -313,7 +313,59 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 
 ---
 
-**Phase 2 overall exit gate:** 2A + 2B + 2C pass; All Maps and Live are honest, server-enforced products; live cost is within budget; no P1; evidence stored.
+---
+
+### Phase 2D — Daily drama pipeline (4–6 weeks)
+
+**Goal:** give the game an owner-approved drama pack every day without ever auto-publishing. The agent researches and drafts; the owner selects, comments, regenerates, approves; the game serves a signed pack with an evergreen fallback.
+
+**Hard rule:** the generator has no production publish credential. A timer cannot publish. No names, faces, voices, usernames, precise locations, minors, victims, active legal cases, politics/religion/ethnicity, health misinformation, or recent tragedy.
+
+#### Scope
+
+- 00:00 Asia/Jakarta scheduled job: source fetch → dedupe → facts/citations → risk screen → candidate drafts (default 3–10; configurable). Lookback default 72 h, max 7 days.
+- Source allowlist: licensed news/RSS + official notices; **no social scraping**, no posts/usernames/photos, no personal data in prompts.
+- AI candidate schema: facts, ≥2 sources where possible, confidence, risk flags, anonymisation + fictionalised notes, gameplay choices, Bang lines, share headline.
+- Admin review queue (mobile-first): source list, risk flags, preview, diff, comment, regenerate, approve/reject.
+- Approval state machine + immutable revisions + append-only audit.
+- Per-card approval + explicit final pack approval; publish only after both.
+- Signed daily pack `daily-YYYY-MM-DD`, content hash, `publishedAt`, `expiresAt`; staging vs production buckets.
+- Game: Daily Challenge features the approved headline drama (“Drama hari ini”); normal runs use the pack with usual rarity; run pins pack version.
+- Fallback: last approved pack/evergreen; kill switch; correction/takedown creates a new version.
+- Transparency: “fictionalised, AI-assisted, human-reviewed, not news”; no live-news claim.
+
+#### Tasks
+
+| #     | Task                                                                                                                         | Output                           |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 2D.0  | Research gate: source licences/ToS, AI provider terms/retention, PDP/defamation review, 5-day dry run, cost at 1/3/10 cities | Brief/ADRs + legal note + budget |
+| 2D.1  | Source adapters + allowlist + no-scraping enforcement                                                                        | Source registry + adapters       |
+| 2D.2  | 00:00 WIB scheduler + candidate cap + retries/backoff                                                                        | Daily job                        |
+| 2D.3  | AI drafting + schema validation + anonymisation/PII/banned-topic checks                                                      | Candidate generator              |
+| 2D.4  | Admin review UI: select/reject/comment/regenerate/preview/approve, mobile-first                                              | Review console                   |
+| 2D.5  | Approval state machine + immutable revisions + audit log + owner 2FA                                                         | Approval service                 |
+| 2D.6  | Signed pack build/publish to R2 staging→production; no generator publish credential                                          | Pack pipeline                    |
+| 2D.7  | Game fetch/cache/pin/fallback + Daily Challenge integration + labels                                                         | Client integration               |
+| 2D.8  | Kill switch, correction/takedown, rollback, no-auto-publish test                                                             | Runbook + tests                  |
+| 2D.9  | 5-day dry run: owner approvals/comments/revisions, fact-check sample, anonymisation test, legal/sensitivity sign-off         | Dry-run report                   |
+| 2D.10 | Cost dashboard/caps/alerts (sources, tokens, storage)                                                                        | Admin + alerts                   |
+
+#### Exit gate
+
+- [ ] 5-day dry run: ≥3 packs approved; ≤2 revisions/pack; owner review ≤20 min/pack.
+- [ ] 0 names/PII/usernames/photos in approved cards (automated + human sample).
+- [ ] Every factual claim has ≥2 sources or blocks publish; confidence + `fictionalised` note present.
+- [ ] Generator/publish credential separation proven: generator cannot publish; CI cannot promote an unapproved pack; timer cannot bypass approval.
+- [ ] Per-card + final pack approval recorded; revisions never inherit approval.
+- [ ] Fallback works: no approval, job failure, model/source down → last approved/evergreen; run still completes.
+- [ ] Pack is signed/versioned; old runs keep their pack; correction/takedown works.
+- [ ] Legal/privacy/defamation/sensitivity review signed; no auto-publish flag in production.
+- [ ] Cost within cap; kill switch tested.
+- [ ] Owner accepts the workflow and the first pack.
+
+**Phase 2D is owner-gated by design.** The agent may prepare as many candidates as the owner wants, but nothing enters production until the owner approves the cards and the final pack.
+
+**Phase 2 overall exit gate:** 2A + 2B + 2C + 2D pass; All Maps and Live are honest, server-enforced products; daily drama has owner approval/no-auto-publish/fallback evidence; live cost is within budget; no P1; evidence stored.
 
 ---
 
@@ -725,21 +777,22 @@ These are planning ranges, not promises. If the quality gate is red, the date mo
 
 ## 11. Decision log
 
-| Date       | Decision                                                                                                    | Rationale                                                                               |
-| ---------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| 2026-10-19 | Free = choose one route; All Maps Rp 79k one-time; Live Rp 49k/month; no ads                                | User decision; free route is the real game; Live funds data; All Maps funds content     |
-| 2026-10-19 | Subscription + live data in Phase 2; other cities in Phase 3                                                | User decision; live is the subscription’s reason to exist                               |
-| 2026-10-19 | Research-first gate: brief + ADR + benchmark/cost/security/WNI evidence before plan/code                    | Prevents stale-fact rewrites and unsafe cost/security assumptions                       |
-| 2026-10-19 | Brand line: “Susahnya nyata, dramanya gratis.” / “Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.” | User direction; drama is core; dry, self-deprecating, expandable per game               |
-| 2026-10-19 | Drama = core, rare, real-basis, fictionalised, fair, shareable; ADR-0005                                    | User direction; freshness/memory/share engine; bounded to avoid exploiting real tragedy |
-| 2026-10-18 | Real place names, original branding, no official logos                                                      | Authenticity without IP/trade-dress risk                                                |
-| 2026-10-19 | Payment provider: Mayar; sandbox until KYC                                                                  | User decision; supports one-time invoice + SaaS subscription; MoR but no tax processing |
-| 2026-10-19 | Live data: TomTom traffic/incidents + BMKG weather; crowding modeled/opt-in                                 | Only feasible real feeds today; no public KRL/TransJakarta live crowding                |
-| 2026-10-18 | Deploy to netcup VPS at `wniseries.ahaqqu.com`; Cloudflare edge                                             | Existing infra; Postgres/payment/cron/fixed IP favor VPS                                |
-| 2026-10-18 | Astro platform + Vite/Three.js game + Fastify/Postgres API                                                  | SEO/performance for web; control/determinism for game; robust payments                  |
-| 2026-10-18 | One-hand portrait-first, offline-tolerant; live snapshot at run start                                       | The game is played during a commute; determinism/fairness                               |
-| 2026-10-18 | Versioned content packs with `effective_from`                                                               | Real-world data changes; no hard-coded timetables                                       |
-| TBD        | Final subtitle/logo/voice budget; one-route change policy; All Maps future-city wording                     | Design/product open questions                                                           |
+| Date       | Decision                                                                                                    | Rationale                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 2026-10-19 | Free = choose one route; All Maps Rp 79k one-time; Live Rp 49k/month; no ads                                | User decision; free route is the real game; Live funds data; All Maps funds content        |
+| 2026-10-19 | Subscription + live data in Phase 2; other cities in Phase 3                                                | User decision; live is the subscription’s reason to exist                                  |
+| 2026-10-19 | Research-first gate: brief + ADR + benchmark/cost/security/WNI evidence before plan/code                    | Prevents stale-fact rewrites and unsafe cost/security assumptions                          |
+| 2026-10-19 | Brand line: “Susahnya nyata, dramanya gratis.” / “Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.” | User direction; drama is core; dry, self-deprecating, expandable per game                  |
+| 2026-10-19 | Drama = core, rare, real-basis, fictionalised, fair, shareable; ADR-0005                                    | User direction; freshness/memory/share engine; bounded to avoid exploiting real tragedy    |
+| 2026-10-19 | Daily drama: 00:00 WIB AI research/draft, owner approval, no auto-publish; ADR-0006                         | User direction; daily freshness without legal/privacy/human-harm risk; human is final gate |
+| 2026-10-18 | Real place names, original branding, no official logos                                                      | Authenticity without IP/trade-dress risk                                                   |
+| 2026-10-19 | Payment provider: Mayar; sandbox until KYC                                                                  | User decision; supports one-time invoice + SaaS subscription; MoR but no tax processing    |
+| 2026-10-19 | Live data: TomTom traffic/incidents + BMKG weather; crowding modeled/opt-in                                 | Only feasible real feeds today; no public KRL/TransJakarta live crowding                   |
+| 2026-10-18 | Deploy to netcup VPS at `wniseries.ahaqqu.com`; Cloudflare edge                                             | Existing infra; Postgres/payment/cron/fixed IP favor VPS                                   |
+| 2026-10-18 | Astro platform + Vite/Three.js game + Fastify/Postgres API                                                  | SEO/performance for web; control/determinism for game; robust payments                     |
+| 2026-10-18 | One-hand portrait-first, offline-tolerant; live snapshot at run start                                       | The game is played during a commute; determinism/fairness                                  |
+| 2026-10-18 | Versioned content packs with `effective_from`                                                               | Real-world data changes; no hard-coded timetables                                          |
+| TBD        | Final subtitle/logo/voice budget; one-route change policy; All Maps future-city wording                     | Design/product open questions                                                              |
 
 ---
 

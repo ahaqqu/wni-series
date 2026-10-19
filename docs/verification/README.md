@@ -10,21 +10,22 @@ This is the operational contract for “done”. It applies to every phase and e
 
 ## 2. Test tiers
 
-| Tier            | Command (target)        | Evidence                                                                 |
-| --------------- | ----------------------- | ------------------------------------------------------------------------ |
-| Research        | manual + PR review      | brief, ADR, source log, benchmark, cost/security/UX notes; freshness     |
-| Docs & scaffold | `pnpm verify:docs`      | console output, link report                                              |
-| Unit            | `pnpm test`             | coverage summary, failing test names                                     |
-| Contract        | `pnpm test:contract`    | schema/route coverage                                                    |
-| Integration     | `pnpm test:integration` | Postgres/Mayar mock logs (redacted)                                      |
-| E2E             | `pnpm test:e2e`         | Playwright HTML report, trace, screenshots, video                        |
-| Payment sandbox | `pnpm test:payments`    | Mayar order/member IDs, API verification, DB assertions (redacted)       |
-| Live data       | `pnpm test:live`        | fixture snapshots, source/freshness/confidence, cost-cap and stale tests |
-| Performance     | `pnpm test:perf`        | Lighthouse JSON, FPS CSV, renderer.info                                  |
-| Security        | `pnpm test:security`    | audit, gitleaks, ZAP, authz matrix                                       |
-| Accessibility   | `pnpm test:a11y`        | axe JSON + manual checklist                                              |
-| Content         | `pnpm verify:content`   | schema/station/fare/door-side/attribution report                         |
-| Deploy          | CI deploy workflow      | smoke output, release SHA, rollback proof                                |
+| Tier            | Command (target)           | Evidence                                                                              |
+| --------------- | -------------------------- | ------------------------------------------------------------------------------------- |
+| Research        | manual + PR review         | brief, ADR, source log, benchmark, cost/security/UX notes; freshness                  |
+| Docs & scaffold | `pnpm verify:docs`         | console output, link report                                                           |
+| Unit            | `pnpm test`                | coverage summary, failing test names                                                  |
+| Contract        | `pnpm test:contract`       | schema/route coverage                                                                 |
+| Integration     | `pnpm test:integration`    | Postgres/Mayar mock logs (redacted)                                                   |
+| E2E             | `pnpm test:e2e`            | Playwright HTML report, trace, screenshots, video                                     |
+| Payment sandbox | `pnpm test:payments`       | Mayar order/member IDs, API verification, DB assertions (redacted)                    |
+| Live data       | `pnpm test:live`           | fixture snapshots, source/freshness/confidence, cost-cap and stale tests              |
+| Daily drama     | `pnpm test:drama` (target) | candidate/approval states, no-auto-publish, anonymity/PII, signature, fallback, audit |
+| Performance     | `pnpm test:perf`           | Lighthouse JSON, FPS CSV, renderer.info                                               |
+| Security        | `pnpm test:security`       | audit, gitleaks, ZAP, authz matrix                                                    |
+| Accessibility   | `pnpm test:a11y`           | axe JSON + manual checklist                                                           |
+| Content         | `pnpm verify:content`      | schema/station/fare/door-side/attribution report                                      |
+| Deploy          | CI deploy workflow         | smoke output, release SHA, rollback proof                                             |
 
 Today the docs/scaffold and landing/API build/test tiers are active. Game/E2E/payment/live tiers become active with their phases. Do not invent a passing test.
 
@@ -41,6 +42,7 @@ artifacts/verification/<phase>/<YYYY-MM-DD>/
   performance/         # Lighthouse JSON, FPS CSV, renderer.info
   security/            # redacted reports
   payment/             # redacted order IDs/callbacks
+  drama/               # packs, approval records (no personal data), fallback test
   db/                  # query assertions, no PII
 ```
 
@@ -77,6 +79,7 @@ artifacts/verification/<phase>/<YYYY-MM-DD>/
 - [ ] Cost: provider price/FX/date, worst case, caps, unit economics.
 - [ ] Scaling/robustness: failure/degraded/rollback path; what breaks at 10× stated.
 - [ ] WNI experience: physical/emotional evidence or approved gap; native/punch-down review.
+- [ ] Daily drama: owner approvals recorded; no names/PII; generator cannot publish; fallback works; legal/sensitivity sign-off.
 - [ ] Visual evidence at mobile + desktop.
 - [ ] `status.md` updated; report/checklist committed.
 

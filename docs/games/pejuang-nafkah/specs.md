@@ -1,7 +1,7 @@
 # specs.md — Pejuang Nafkah (WNI Series #1)
 
 **Product specification and quality contract**
-**Version:** 4.2
+**Version:** 4.3
 **Date:** 2026-10-19
 **Status:** design baseline — game/checkout implementation not started; pre-alpha landing page + waitlist implemented
 **Owner:** WNI Series
@@ -209,22 +209,36 @@ Drama is a core layer, not garnish. The game should make the player wonder “wa
 
 Full decision: [ADR-0005](../../adr/0005-drama-system.md); source-bank plan: [drama research](research/2026-10-drama-system.md).
 
+### P19. **Daily drama, human approval, no auto-publish.**
+
+The game should have something new each day, but a daily cadence must never become an automatic publishing machine.
+
+- **Midnight research, candidate-only.** At 00:00 Asia/Jakarta an agent may research recent public events (default last 72 hours, max 7 days) and draft a configurable number of anonymous candidates (default 3–10; the owner can request more within cost caps). It writes to a review queue, never to production.
+- **Owner approves every card and the pack.** The owner selects, comments, requests regeneration, and approves. A revision never inherits approval. A pack publishes only after every included card and the final pack are approved.
+- **No auto-publish, ever.** The generator has no production publish credential. Publishing requires an authenticated owner action, 2FA, an approval record, a content hash, and an audit entry. A timer cannot bypass approval.
+- **Anonymous and real-basis.** No names, faces, voices, usernames, precise locations, minors, victims, active legal cases, politics/religion/ethnicity, health misinformation, or recent tragedy. Sources must be licensed/allowed; no social scraping.
+- **Fallback, not failure.** If nothing is approved, the game serves the last approved pack or the evergreen bank.
+- **Transparent.** The game labels daily drama as fictionalised, AI-assisted, human-reviewed — not news.
+
+Full decision: [ADR-0006](../../adr/0006-daily-drama-pipeline.md); pre-flight: [daily drama research](research/2026-10-daily-drama-pipeline.md).
+
 ---
 
 ## 6. Core objectives
 
 ### 6.1 Experience objectives
 
-| ID  | Objective                           | Key result (v1)                                                                                      |
-| --- | ----------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| X1  | The player recognises their commute | ≥80% of 12+ playtesters say “this feels like my commute” within one run                              |
-| X2  | One-hand play is real               | ≥90% of mobile playtesters complete the first run one-handed without instruction                     |
-| X3  | The game is fun, not just sad       | ≥70% choose “fun/would play again”; median session 6–12 min                                          |
-| X4  | Failure feels fair                  | ≥80% of failed runs say “I know what I’d do differently”                                             |
-| X5  | The tone lands                      | ≥70% say “warm/funny/respectful”; ≤10% say “miserable/mocking”                                       |
-| X6  | Arrival feels good                  | ≥80% report relief/satisfaction at the arrival screen                                                |
-| X7  | Live is useful, not decorative      | ≥60% of Live beta users used the plan for a real trip; ≥70% can explain Live vs Estimasi             |
-| X8  | Drama is memorable and shareable    | ≥60% of playtesters retell a drama unprompted; ≥30% would share the card; ≤10% feel it mocks victims |
+| ID  | Objective                           | Key result (v1)                                                                                             |
+| --- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| X1  | The player recognises their commute | ≥80% of 12+ playtesters say “this feels like my commute” within one run                                     |
+| X2  | One-hand play is real               | ≥90% of mobile playtesters complete the first run one-handed without instruction                            |
+| X3  | The game is fun, not just sad       | ≥70% choose “fun/would play again”; median session 6–12 min                                                 |
+| X4  | Failure feels fair                  | ≥80% of failed runs say “I know what I’d do differently”                                                    |
+| X5  | The tone lands                      | ≥70% say “warm/funny/respectful”; ≤10% say “miserable/mocking”                                              |
+| X6  | Arrival feels good                  | ≥80% report relief/satisfaction at the arrival screen                                                       |
+| X7  | Live is useful, not decorative      | ≥60% of Live beta users used the plan for a real trip; ≥70% can explain Live vs Estimasi                    |
+| X8  | Drama is memorable and shareable    | ≥60% of playtesters retell a drama unprompted; ≥30% would share the card; ≤10% feel it mocks victims        |
+| X9  | Daily drama is fresh and safe       | 5-day dry run: ≥3 packs approved, ≤2 revisions/pack, 0 names/PII, fallback works, owner review ≤20 min/pack |
 
 ### 6.2 Product objectives
 
@@ -286,6 +300,7 @@ Full decision: [ADR-0005](../../adr/0005-drama-system.md); source-bank plan: [dr
 - **Payments:** Mayar sandbox → production; one-time All Maps, Live subscription, cosmetics; server-side entitlements, refund/revocation, reconciliation.
 - **PWA:** installable, offline-tolerant free/All Maps play, update flow; Live requires network for a fresh snapshot and degrades to the last cached snapshot with a stale label.
 - **Sharing:** local image/text share card at arrival, Web Share API + download/copy fallback; no public feed, no upload, no account required.
+- **Daily drama (Phase 2D):** midnight candidate generation, owner review/approval, immutable signed daily packs, evergreen fallback. No auto-publish; no social scraping; no names/PII.
 - **Admin:** orders, refunds, entitlements, subscriptions, reconciliation, live-data cost/call dashboard, audit log, feature flags.
 - **Analytics:** privacy-first product funnel and game telemetry; no PII.
 
@@ -304,6 +319,8 @@ Full decision: [ADR-0005](../../adr/0005-drama-system.md); source-bank plan: [dr
 - AI-generated live dialogue (static authored content only for v1).
 - A public drama feed, real-news ingestion, UGC, or reconstructions of real recent tragedies.
 - Paid drama packs, drama gacha, or any drama content locked behind All Maps/Live.
+- Automatic daily-drama publishing, AI-only editorial, or an approval bypass.
+- Scraping social platforms, storing posts/usernames/photos, or feeding personal data to an AI.
 
 ### 7.3 Phase 3 candidates (not commitments)
 
@@ -515,7 +532,7 @@ Priority: **M** = must for v1, **S** = should, **C** = could.
 | OPS-05  | Runbooks                   | M        | deploy, payment, backup/restore, incident, privacy request                                                                         |
 | OPS-06  | Status page/changelog      | S        | Public known issues + changelog                                                                                                    |
 
-### 9.8 Drama and sharing
+### 9.8 Drama, daily content, and sharing
 
 | ID       | Requirement    | Priority | Acceptance                                                                                                            |
 | -------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -655,8 +672,9 @@ The full threat model is in `architecture.md` §11. Non-negotiable outcomes:
 ## 13. Privacy and compliance requirements
 
 - **Lawful bases:** contract (account/game), legal obligation (tax/accounting), consent (marketing/optional analytics), legitimate interest (security/fraud) with documented balancing.
-- **Data map:** email, name, avatar URL, locale, IP hash, user agent, session metadata, saves, runs, **chosen free route**, orders, entitlements, **Mayar customer/member IDs**, **live planner inputs (origin/destination chosen from a list, not GPS)**, support emails, anonymous events.
+- **Data map:** email, name, avatar URL, locale, IP hash, user agent, session metadata, saves, runs, **chosen free route**, orders, entitlements, **Mayar customer/member IDs**, **live planner inputs (origin/destination chosen from a list, not GPS)**, support emails, anonymous events, **drama candidates/reviews/approval audit (owner-only; no personal data of subjects)**.
 - **No sensitive data:** no NIK, phone, address, precise location/GPS, health, biometrics, religion, sexual orientation, contacts, ad ID. Live planner never requests device location; the user picks a known corridor.
+- **AI processing:** no personal data of drama subjects, bystanders, or users in prompts/source captures; source text is untrusted data, not instructions; no training on our content; provider retention/region reviewed before Phase 2D.
 - **Retention:** account until deletion + 30 days; orders/tax records 10 years; subscription IDs until end + 90 days (tax 10 years); live planner inputs 30 days; live rider reports 90 days pseudonymous; logs 30 days; analytics 14 months; backups 30 days; IP hashes 30 days.
 - **Rights:** access/export, correction, deletion, portability, objection, automated decision explanation. Target 14 days, max 30.
 - **Cross-border:** netcup (EU region to be confirmed), Cloudflare, Mayar, TomTom, BMKG, Google, Resend, Sentry; disclose and use appropriate safeguards/consent.
@@ -766,7 +784,8 @@ A phase is not done unless:
 13. 12+ playtest recognition ≥80%; one-hand completion ≥90%; D1 proxy ≥30% in beta.
 14. No critical/high security findings; CSP enforced; secrets scanned.
 15. Drama: source bank + sensitivity review current; rarity/fairness test passes; no real recent tragedy/victims; share card has no PII and works offline.
-16. Launch checklist signed in `status.md`.
+16. Daily drama: 5-day dry run with owner approvals/comments/revisions; 0 names/PII; legal/sensitivity review; fallback, audit, and no-auto-publish test pass.
+17. Launch checklist signed in `status.md`.
 
 ---
 
@@ -782,3 +801,4 @@ A phase is not done unless:
 8. **Support/identity:** KYC/legal business name, address, phone, and whether support moves from `wniseries@gmail.com` to a domain address.
 9. **Live cost policy:** 30-min polling below ~300 subs; 5-min peak above; hard monthly provider budget and kill-switch behaviour.
 10. **Drama policy:** exact rarity, family list, and share-card format after the Phase 1 source bank + sensitivity review; content lock blocked until then.
+11. **Daily drama:** source/API/provider, AI model/terms, owner review SLA, daily-vs-weekday cadence, cost cap, and whether Phase 2D ships with launch or after launch. No auto-publish in any case.

@@ -1,10 +1,10 @@
 # brand.md — WNI Series / Pejuang Nafkah
 
 **Voice, slogans, drama, and the Bang Nafkah narrator**
-**Version:** 1.1
+**Version:** 1.2
 **Date:** 2026-10-19
 **Status:** active brand direction; copy is not final until native and sensitivity review
-**Companions:** [specs.md](specs.md) · [design.md](design.md) · [ADR-0005](../../adr/0005-drama-system.md) · [drama research plan](research/2026-10-drama-system.md) · [status.md](status.md)
+**Companions:** [specs.md](specs.md) · [design.md](design.md) · [ADR-0005](../../adr/0005-drama-system.md) · [ADR-0006](../../adr/0006-daily-drama-pipeline.md) · [drama research plan](research/2026-10-drama-system.md) · [daily pipeline](research/2026-10-daily-drama-pipeline.md) · [status.md](status.md)
 
 > **Rule:** the joke is a coping mechanism, not a verdict. We laugh at the situation, the system, and ourselves — never at people who are already carrying the day.
 
@@ -67,6 +67,8 @@ The brand rules for drama:
 | Angkot stops anywhere        | “Berhenti di mana saja, sampai di mana-mana.”       |
 
 **Do not:** make a tragedy the twist, use a real disaster photo, turn a victim into a lesson, make an identity group the cause, or use “drama” as an excuse for cruelty. If the honest response is silence, be silent.
+
+**Daily cadence (Phase 2D):** an AI agent may research and draft a daily pack, but a human owner approves every card and the final pack; nothing auto-publishes. The label is **“Drama hari ini”** + “Diinspirasi kejadian nyata, bukan berita. Nama dan detail disamarkan. Dibantu AI, disunting dan disetujui manusia.” The agent can be creative in the writing; it cannot invent facts, name people, or publish.
 
 ## 3. Expansion template
 

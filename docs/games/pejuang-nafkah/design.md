@@ -1,7 +1,7 @@
 # design.md — Pejuang Nafkah
 
 **Game design, experience design, art direction, and web design**
-**Version:** 4.2
+**Version:** 4.3
 **Date:** 2026-10-19
 **Status:** design baseline — game/checkout not started; pre-alpha landing page exists
 **Companion docs:** [specs.md](specs.md) · [plan.md](plan.md) · [architecture.md](architecture.md) · [brand](brand.md) · [research protocol](research/PROTOCOL.md) · [research refresh](research/2026-10-refresh.md) · [live-data/Mayar research](research/2026-10-live-data-and-mayar.md)
@@ -352,7 +352,21 @@ These are starting hypotheses, not locks. Tune after the frequency test; never a
 - Frozen for the run; no server push, no mid-run random event, no network needed.
 - At most one major drama per run; the same major drama does not repeat within 5 runs on the same route.
 - The daily seed gives all players the same **base** drama opportunity; personal choices and skill change the outcome, not the card.
+- Each run pins the daily pack version (when daily drama is live); a pack update never changes an in-progress run.
 - Live data may change the **conditions** (rain, incident probability) at generation time; it never rewrites a scored run.
+
+#### Daily rhythm (Phase 2D)
+
+The daily layer is editorial, not a live feed.
+
+- **00:00 Asia/Jakarta:** a scheduled agent researches recent public events and drafts 3–10 anonymous candidates. It writes to a review queue only; it has no production publish credential.
+- **Owner review:** the owner selects, comments, requests regeneration, and approves each card, then the pack. A revision never inherits approval.
+- **Approved pack:** `daily-YYYY-MM-DD` with a signed manifest, content hash, `publishedAt`, `expiresAt`, and an approval record. A run pins the pack version.
+- **Daily Challenge:** the approved headline drama is guaranteed in the Daily Challenge, clearly labelled “Drama hari ini”. Normal runs use the same pack with the usual rarity, so the daily layer adds freshness without turning every commute into chaos.
+- **No approved pack:** the game serves the last approved pack or the evergreen bank. The daily job failing is a skipped day, not a broken run.
+- **No auto-publish:** a timer cannot publish. Publishing is an authenticated owner action with 2FA, an approval record, and an audit entry.
+
+The agent may be creative in the **writing**, but the facts, anonymity, and ethics checks are constraints. Full pipeline: [ADR-0006](../../adr/0006-daily-drama-pipeline.md) and [daily drama research](research/2026-10-daily-drama-pipeline.md).
 
 #### Real basis, fictional detail
 
@@ -500,6 +514,7 @@ Drama is part of the free game. It is never sold, never gated by All Maps/Live, 
 - **Counterplay:** detour, wait, pay, ask, walk, turn back. There is always a choice, even if all choices cost something.
 - **Stories, not loot:** event outcomes create a “Cerita hari ini” line, a relationship beat, a share card, or a new route marker.
 - **Rarity is content:** not every run gets a drama. The absence is part of the rhythm; the presence is the story.
+- **Daily pack:** when daily drama is live, an owner-approved pack adds a featured story for the Daily Challenge and fresh cards for normal runs; an unapproved or missing pack falls back to evergreen. No auto-publish.
 
 ### 6.6 Characters and narrative
 
@@ -935,6 +950,11 @@ Use `specs.md` §14. Every corridor must pass before content lock. A single wron
 Public sources → source registry → normalized data → hand-authored gameplay graph
 → kejadian/drama bank (real basis + sensitivity) → native copy review
 → playtest (rarity/fairness/recall) → content pack → release
+
+Daily (Phase 2D):
+00:00 WIB research → candidate drafts → automated checks → owner review/comment
+→ regeneration → approval → signed daily pack → game/Daily Challenge
+→ correction/takedown → new version
 ```
 
 - **Source registry:** URL, retrieval date, confidence, licence.
@@ -942,6 +962,7 @@ Public sources → source registry → normalized data → hand-authored gamepla
 - **Gameplay graph:** lane nodes, decision gates, hazard weights, camera cues; hand-authored for fun.
 - **Scenario design:** weather/incident/event combinations, seeded weights, anti-frustration rules.
 - **Drama bank:** real-basis ledger, source IDs, rarity, conditions, choices, effects, Bang lines, share headlines, kill list, sensitivity review.
+- **Daily pipeline:** source allowlist, AI draft schema, anonymisation/PII checks, owner approval state machine, immutable revisions, signed pack, fallback, audit/correction.
 - **Copy:** Indonesian native review, sensitivity review, glossary.
 - **Validation:** schema, station order, distances, fare formula, door side, landmark check.
 - **Release:** version, `effective_from`, changelog, in-game date stamp.
@@ -980,10 +1001,11 @@ Public sources → source registry → normalized data → hand-authored gamepla
 7. Whether `tim subuh` is a difficulty or a separate mode.
 8. How to depict pickpocket/harassment without trivialising it (likely omit harassment; pickpocket as a tense, non-graphic event).
 9. Share-card format/watermark after the share test; exact drama rarity after the frequency test.
-10. English localization depth (UI only vs full story).
-11. Confirm one-route free choice + one courtesy change in 14 days.
-12. Confirm whether All Maps explicitly includes every future Phase 3 city (recommended: yes for Pejuang Nafkah, not future games).
-13. Confirm the exact Live data set at launch (traffic/weather/incidents + estimated crowding) and whether PetaBencana flood layer waits for a commercial licence.
+10. Daily drama cadence (daily vs weekdays), owner review SLA, source/AI provider, and whether Daily Challenge ships with Phase 2D.
+11. English localization depth (UI only vs full story).
+12. Confirm one-route free choice + one courtesy change in 14 days.
+13. Confirm whether All Maps explicitly includes every future Phase 3 city (recommended: yes for Pejuang Nafkah, not future games).
+14. Confirm the exact Live data set at launch (traffic/weather/incidents + estimated crowding) and whether PetaBencana flood layer waits for a commercial licence.
 
 ---
 

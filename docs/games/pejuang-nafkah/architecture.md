@@ -1,9 +1,9 @@
 # architecture.md — WNI Series platform + Pejuang Nafkah
 
 **System architecture, security, privacy, deployment, and verification**
-**Version:** 4.2
+**Version:** 4.3
 **Date:** 2026-10-19
-**Status:** target architecture — game/checkout implementation not started; landing page + waitlist implemented; Mayar/live-data design added
+**Status:** target architecture — game/checkout implementation not started; landing page + waitlist implemented; Mayar/live-data/daily-drama design added
 **Host:** `https://wniseries.ahaqqu.com` — netcup VPS (2 vCPU / 4 GB / 100+ GB SSD) + Cloudflare edge.
 **Asset origin (planned):** `https://assets.wniseries.ahaqqu.com` — R2 custom domain for signed paid packs and large public assets.
 **Companion docs:** [specs.md](specs.md) · [design.md](design.md) · [plan.md](plan.md) · [research protocol](research/PROTOCOL.md) · [ADR index](../../adr/README.md) · [live-data/Mayar research](research/2026-10-live-data-and-mayar.md)
@@ -390,10 +390,14 @@ Drama is a data-driven content layer with a deterministic selector and a client-
 data/
 ├── raw/sources/drama/          # source captures/notes (not redistributed)
 └── normalized/
-    └── drama/<version>/
-        ├── manifest.json       # families, rarity weights, kill list, effectiveFrom
-        ├── cards.json          # drama/kejadian cards
-        └── sources.json        # source registry: id, url, retrievedAt, licence
+    ├── drama/<version>/
+    │   ├── manifest.json       # families, rarity weights, kill list, effectiveFrom
+    │   ├── cards.json          # drama/kejadian cards
+    │   └── sources.json        # source registry: id, url, retrievedAt, licence
+    └── daily/<packId>/
+        ├── manifest.json       # signed pack: packId, contentVersion, approvalId, featuredCardId
+        ├── cards.json          # only owner-approved revisions
+        └── sources.json        # internal source metadata; not redistributed
 ```
 
 **Schema (in `packages/content-schema`)**
@@ -516,10 +520,6 @@ type DramaCard = {
 | `outbox`             | `id`, `type`, `payload`, `status`, `attempts`, `next_attempt_at`                                                                                                                                                                                                                                                                                                                                                     | Emails/receipts/reconciliation                                 |
 | `provider_calls`     | `id`, `provider`, `operation`, `corridor_id`, `status_code`, `cost_micros`, `duration_ms`, `called_at`                                                                                                                                                                                                                                                                                                               | Budget/cost telemetry                                          |
 
-**Indexes:** `orders(user_id, created_at)`, `orders(status, expires_at)`, `orders(provider_transaction_id)`, `subscriptions(user_id, status)`, `subscriptions(provider_member_id)`, `entitlements(user_id, game_id)`, `payment_events(provider_transaction_id)`, `provider_calls(provider, called_at)`.
-
-**Money:** integer rupiah only, no floats. `amount_idr = price_idr` (gross); tax breakdown computed at receipt time when applicable. One-time All Maps price **79,000**; Live **49,000/month**.
-
 ### 7.3 Game/runs/saves
 
 | Table                 | Key columns                                                                                                                                                                      | Notes                              |
@@ -548,6 +548,24 @@ type DramaCard = {
 | `feature_flags` | `key`, `value_json`, `updated_at`                                                                       | Kill switches                   |
 | `rate_limits`   | `key`, `window_start`, `count`                                                                          | DB fallback; Cloudflare primary |
 | `job_locks`     | `name`, `locked_until`, `locked_by`                                                                     | Advisory locks                  |
+
+### 7.6 Daily drama
+
+| Table              | Key columns                                                                                                                                                                | Notes                                                     |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `drama_sources`    | `id`, `publisher`, `url`, `licence`, `terms_url`, `retrieved_at`, `allowlisted`, `active`                                                                                  | Source registry; no source without a licence/terms row    |
+| `drama_candidates` | `id`, `game_id`, `city_id`, `pack_date`, `family`, `status`, `current_revision_id`, `risk_flags`, `created_at`, `updated_at`                                               | One row per candidate; `status` mirrors the state machine |
+| `drama_revisions`  | `id`, `candidate_id`, `revision_no`, `parent_revision_id`, `content_json`, `content_hash`, `model`, `prompt_version`, `created_by`, `created_at`                           | Immutable; no approval inheritance                        |
+| `drama_reviews`    | `id`, `revision_id`, `reviewer_id`, `decision`, `comment`, `checklist_json`, `created_at`                                                                                  | Owner comments/approvals; append-only                     |
+| `drama_packs`      | `id`, `pack_id` (unique), `game_id`, `city_id`, `status`, `content_version`, `manifest_url`, `checksum`, `approval_id`, `published_at`, `expires_at`, `supersedes_pack_id` | Immutable published pack; correction = new row            |
+| `drama_pack_items` | `pack_id`, `candidate_id`, `revision_id`, `position`, `featured`                                                                                                           | Only approved revisions; unique `(pack_id, position)`     |
+| `drama_approvals`  | `id`, `pack_id`, `revision_id`, `scope` (`card`/`pack`), `approver_id`, `content_hash`, `checklist_json`, `approved_at`, `ip_hash`, `note`                                 | Binds approval to content hash; publish checks this       |
+| `drama_audit`      | `id`, `actor_id`, `action`, `pack_id`, `candidate_id`, `revision_id`, `before_json`, `after_json`, `created_at`                                                            | Append-only; separate from general audit for clarity      |
+| `drama_budgets`    | `month`, `provider`, `candidate_limit`, `token_limit`, `spend_limit_micros`, `used_candidates`, `used_tokens`, `used_spend_micros`, `updated_at`                           | Enforced by the daily job; kill switch                    |
+
+**Indexes:** `drama_candidates(pack_date, status)`, `drama_revisions(candidate_id, revision_no)`, `drama_packs(pack_id)`, `drama_packs(status, expires_at)`, `drama_approvals(pack_id, scope)`, `drama_audit(created_at)`.
+
+**Retention:** candidates/revisions/reviews 24 months (audit/legal); rejected 90 days; published packs retained with content versions; no personal data of subjects.
 
 **Indexes:** `orders(user_id, created_at)`, `orders(status, expires_at)`, `orders(order_ref)`, `orders(provider_transaction_id)`, `entitlements(user_id, game_id)`, `runs(game_id, mode, route_id, created_at)`, `leaderboard_entries(period, category, score desc)`, `payment_events(provider_transaction_id)`, `sessions(expires_at)`.
 
@@ -604,22 +622,35 @@ type DramaCard = {
 | `POST`   | `/api/v1/support`                         | Contact form (rate-limited, spam-protected)                   |
 | `GET`    | `/api/v1/config`                          | Feature flags / maintenance                                   |
 | `GET`    | `/api/v1/content/:game/:version/manifest` | Content manifest (public/free or entitled)                    |
+| `GET`    | `/api/v1/content/daily/:date/manifest`    | Daily pack manifest only if approved/published                |
+| `GET`    | `/api/v1/content/daily/latest/manifest`   | Latest approved/valid daily pack                              |
 
 ### 8.3 Webhooks/internal
 
-| Method | Path                                       | Purpose                                               |
-| ------ | ------------------------------------------ | ----------------------------------------------------- |
-| `POST` | `/api/v1/webhooks/mayar/:secret`           | Mayar webhook trigger; re-fetch API; no payload trust |
-| `GET`  | `/api/v1/checkout/return`                  | Not an API; platform page polls order                 |
-| `POST` | `/api/v1/internal/reconcile`               | Signed cron trigger or localhost-only                 |
-| `POST` | `/api/v1/internal/live-refresh`            | Scheduled snapshot worker (advisory lock)             |
-| `POST` | `/api/v1/internal/cleanup`                 | Retention/expiry job                                  |
-| `GET`  | `/api/v1/admin/orders`                     | Admin list (role)                                     |
-| `POST` | `/api/v1/admin/orders/:id/refund`          | Refund + revoke                                       |
-| `POST` | `/api/v1/admin/entitlements/:userId/grant` | Manual grant (audited)                                |
-| `GET`  | `/api/v1/admin/subscriptions`              | Subscription/renewal/cancel list                      |
-| `GET`  | `/api/v1/admin/live-costs`                 | Provider calls/spend/freshness                        |
-| `GET`  | `/api/v1/admin/audit`                      | Audit log                                             |
+| Method | Path                                           | Purpose                                               |
+| ------ | ---------------------------------------------- | ----------------------------------------------------- |
+| `POST` | `/api/v1/webhooks/mayar/:secret`               | Mayar webhook trigger; re-fetch API; no payload trust |
+| `GET`  | `/api/v1/checkout/return`                      | Not an API; platform page polls order                 |
+| `POST` | `/api/v1/internal/reconcile`                   | Signed cron trigger or localhost-only                 |
+| `POST` | `/api/v1/internal/live-refresh`                | Scheduled snapshot worker (advisory lock)             |
+| `POST` | `/api/v1/internal/cleanup`                     | Retention/expiry job                                  |
+| `GET`  | `/api/v1/admin/orders`                         | Admin list (role)                                     |
+| `POST` | `/api/v1/admin/orders/:id/refund`              | Refund + revoke                                       |
+| `POST` | `/api/v1/admin/entitlements/:userId/grant`     | Manual grant (audited)                                |
+| `GET`  | `/api/v1/admin/subscriptions`                  | Subscription/renewal/cancel list                      |
+| `GET`  | `/api/v1/admin/live-costs`                     | Provider calls/spend/freshness                        |
+| `GET`  | `/api/v1/admin/audit`                          | Audit log                                             |
+| `POST` | `/api/v1/internal/drama/generate`              | Scheduler-only; candidate-only; advisory lock         |
+| `POST` | `/api/v1/internal/drama/cleanup`               | Reject/expire drafts; retention                       |
+| `GET`  | `/api/v1/admin/drama/candidates`               | Review queue (admin role)                             |
+| `GET`  | `/api/v1/admin/drama/candidates/:id`           | Sources, risk flags, revisions, diff                  |
+| `POST` | `/api/v1/admin/drama/candidates/:id/select`    | Owner selects a candidate                             |
+| `POST` | `/api/v1/admin/drama/candidates/:id/revisions` | Comment/regenerate; new revision, no approval         |
+| `POST` | `/api/v1/admin/drama/revisions/:id/approve`    | Approve a card (2FA)                                  |
+| `POST` | `/api/v1/admin/drama/revisions/:id/reject`     | Reject with reason                                    |
+| `POST` | `/api/v1/admin/drama/packs/:id/approve`        | Approve final pack (2FA; all cards approved)          |
+| `POST` | `/api/v1/admin/drama/packs/:id/publish`        | Publish approved pack; idempotent; audit              |
+| `GET`  | `/api/v1/admin/drama/costs`                    | AI/source spend, candidate count, fallback rate       |
 
 ### 8.4 Checkout request/response (sketch)
 
@@ -929,6 +960,116 @@ At 10 corridors × 4 flow points, adaptive polling (5 min during 9 peak hours, 3
 - PetaBencana only after a commercial CC BY agreement; no non-commercial production use.
 
 ---
+
+## 10B. Daily drama pipeline (Phase 2D)
+
+> **Invariant:** the agent can research and draft; it cannot publish. The owner approves each card and the final pack. No auto-publish path exists in production.
+
+### 10B.1 Components and flow
+
+```mermaid
+flowchart LR
+  Timer[00:00 Asia/Jakarta
+systemd timer] --> Job[Research job
+separate service account]
+  Job --> Sources[Allowlisted news/RSS
++ official notices]
+  Sources --> Facts[Facts + citations
++ source dates]
+  Facts --> Screen[Risk / PII / banned-topic
+screen]
+  Screen --> AI[AI draft
+3-10 anonymous cards]
+  AI --> Checks[Schema + anonymisation
++ dedupe + no-source checks]
+  Checks --> Queue[(drama_candidates
+drama_revisions)]
+  Queue --> Review[Owner review UI
+Cloudflare Access + 2FA]
+  Review -->|comment| AI
+  Review -->|approve card| Approvals[(drama_approvals)]
+  Approvals -->|approve pack| Publish[Signed pack builder
+separate publish role]
+  Publish --> R2[(R2 production
+daily/<date>/)]
+  R2 --> Game[Game fetch/cache
+run pins pack]
+  Game --> Fallback[Last approved pack
+or evergreen]
+  Publish --> Audit[(append-only audit)]
+```
+
+- **Generator role:** can read sources, write `drama_candidates`/`drama_revisions`, call the model, and upload to a **staging** prefix. It has no production bucket write and no publish endpoint permission.
+- **Publish role:** can read approved packs, write the production prefix, and sign the manifest. It cannot create candidates or approve.
+- **Owner role:** can select, comment, regenerate, approve/reject, and publish. Publishing requires a fresh 2FA assertion and records an approval ID + content hash.
+- **Scheduler:** systemd timer (or cron) at `OnCalendar=*-*-* 00:00:00 Asia/Jakarta`; a Postgres advisory lock prevents overlap. Research window: default last 72 h, max 7 days. If the job is late, it still creates candidates; it never auto-publishes.
+- **Review UI:** authenticated admin route, mobile-first; shows sources, risk flags, anonymisation notes, preview, diff, comments, revision history, approve/reject. No public candidate feed.
+
+### 10B.2 State machine
+
+```text
+draft ──► candidate ──► selected ──► approved ──┐
+  │            │            │                    ├──► pack_approved ──► scheduled ──► published
+  │            │            └──► revision_requested ──► candidate (new revision)
+  │            └──► rejected                         │
+  └──► rejected                                      └──► retired / corrected
+```
+
+- Each revision is immutable; a comment/regenerate creates a new revision with `parent_revision_id`, and the new revision starts at `candidate` (never inherits approval).
+- A pack can publish only when `status=pack_approved`, every included item is `approved`, and the owner has confirmed the final preview.
+- Correction/takedown creates a new pack version with `supersedes_pack_id` and an audit note; the old pack is retired but retained for replay/audit.
+
+### 10B.3 Daily pack format
+
+```json
+{
+  "packId": "daily-2026-10-20",
+  "gameId": "pejuang-nafkah",
+  "cityId": "jabodetabek",
+  "contentVersion": "2026.10.20.1",
+  "publishedAt": "2026-10-20T00:00:00+07:00",
+  "expiresAt": "2026-10-21T00:00:00+07:00",
+  "approvalId": "apr_...",
+  "featuredCardId": "drama-flood-underpass-01",
+  "cards": ["..."],
+  "checksum": "sha256:...",
+  "signature": "ed25519:..."
+}
+```
+
+- The manifest is signed with an Ed25519 key; the game pins the public key and verifies the checksum before use. If verification fails, fall back.
+- The pack is immutable; a correction is a new `contentVersion`.
+- `expiresAt` is a soft expiry: the game keeps the last verified pack until a new one is available, with a `stale` label if older than 48 h.
+
+### 10B.4 Game integration
+
+- `GET /api/v1/games/:slug/bootstrap` returns `dailyPack: { packId, manifestUrl, checksum, expiresAt }` only for an approved/published pack.
+- The game fetches the manifest/pack from the asset origin, verifies the signature/checksum, caches in IndexedDB, and pins `packId`/`contentVersion` at run start.
+- **Daily Challenge:** the featured approved card is guaranteed and labelled “Drama hari ini”. Normal runs use the same pack with the usual rarity; a run never gets a mid-run pack change.
+- No AI call at runtime; no user data leaves the device for the daily pack.
+- If the pack is missing, invalid, or expired beyond the stale window, use the last verified pack or the evergreen bank.
+
+### 10B.5 Security and privacy
+
+| Threat                                | Control                                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Auto-publish or compromised generator | Separate roles; production bucket write denied to generator; publish requires owner 2FA + approval ID + hash; CI cannot promote |
+| Approval bypass/replay                | Unique approval per pack/version; state machine; idempotent publish; audit; hash bound to approval                              |
+| Prompt injection via source text      | Source text treated as data, never instructions; HTML stripped; no tool use from source content; allowlisted fetchers           |
+| SSRF/arbitrary URLs                   | Source allowlist + DNS/IP checks; no user-supplied URLs; egress restricted                                                      |
+| PII/defamation in a card              | NER/PII + banned-topic checks; human review; no names/faces/voices; legal/sensitivity checklist; kill switch                    |
+| Copyright                             | Facts only; no copied captions/photos/video; source links internal; licence registry                                            |
+| Content injection/XSS                 | JSON schema; no HTML from AI; escape on render; CSP                                                                             |
+| Cost abuse                            | Candidate/token/source caps; budget; alerts; kill switch                                                                        |
+| Candidate data leak                   | Admin-only; no public bucket; retention; no personal data in candidates                                                         |
+
+### 10B.6 Operations and observability
+
+- **Target timeline:** candidates by 00:30 WIB; owner review any time; publish when approved. Do not promise a fixed morning publish if approval is missing.
+- **Fallback:** no approval by the morning cutoff → last approved pack/evergreen; no user-facing error.
+- **Alerts:** job failed/overran, no candidates by 00:45, pack unapproved by 06:00 (warning, not auto-publish), publish failed, pack stale >48 h, PII/banned-topic rejection spike, AI/source spend >80% budget.
+- **Metrics:** candidates/day, approval time, revisions/pack, rejection reasons, publish count, fallback rate, stale packs, cost/day, PII/name hits.
+- **Runbook:** source outage, model outage, owner unavailable, bad card published, correction/takedown, pack rollback, key rotation.
 
 ## 11. Security architecture
 
@@ -1242,7 +1383,7 @@ SLOs:
 - **API:** integration with real Postgres; Mayar mock + sandbox; auth flows; authz matrix; webhook fuzz/replay; one-time/subscription lifecycle; live snapshot contract/cost.
 - **Game client:** Playwright with WebGL; input scripts; screenshots; FPS probe; offline mode; resize/orientation.
 - **Platform:** Playwright for auth/account/checkout; axe; Lighthouse; link checker.
-- **Content:** schema + station order/fare/door side/attribution assertions + drama source/rarity/fairness assertions.
+- **Content:** schema + station order/fare/door side/attribution assertions + drama source/rarity/fairness assertions + daily pack signature/approval/fallback tests.
 - **Security:** gitleaks, `pnpm audit`, ZAP baseline, custom authz tests; pen test Phase 5.
 - **Ops:** deploy/rollback/restore drills; staging smoke.
 
@@ -1254,6 +1395,7 @@ SLOs:
 - Content version pinned; RNG version pinned.
 - Server validates: duration bounds, score bounds, token unused, content version, route/mode; top 100 replay.
 - Drama selection is replayed from the seed + content version; the expected card IDs are compared with the client trace.
+- Daily packs are pinned by `packId` + checksum; the expected pack/card IDs are part of replay validation.
 
 ### 16.3 Evidence and agent protocol
 
@@ -1265,61 +1407,72 @@ See `plan.md` §5 and `docs/verification/README.md`. Every phase produces a repo
 
 > Names indicative; never commit real values. Use `.env.example` with placeholders.
 
-| Variable                                                                    | Scope         | Notes                                                |
-| --------------------------------------------------------------------------- | ------------- | ---------------------------------------------------- |
-| `NODE_ENV`                                                                  | API           | production/staging/development                       |
-| `PORT`                                                                      | API           | 3000                                                 |
-| `PUBLIC_SITE_URL`                                                           | platform/game | `https://wniseries.ahaqqu.com`                       |
-| `DATABASE_URL`                                                              | API           | `postgres://wni:...@postgres:5432/wni`               |
-| `BETTER_AUTH_SECRET`                                                        | API           | 32+ bytes                                            |
-| `BETTER_AUTH_URL`                                                           | API           | site URL                                             |
-| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`                                 | API           | OAuth                                                |
-| `RESEND_API_KEY`                                                            | API           | email                                                |
-| `EMAIL_FROM`                                                                | API           | `no-reply@ahaqqu.com` (verified)                     |
-| `SUPPORT_EMAIL`                                                             | API/platform  | `wniseries@gmail.com`                                |
-| `MAYAR_ENV`                                                                 | API           | `sandbox` / `production`                             |
-| `MAYAR_API_KEY`                                                             | API           | server only; 50 req/min                              |
-| `MAYAR_PRODUCT_ID_ALL_MAPS`                                                 | API           | Mayar invoice/payment product                        |
-| `MAYAR_PRODUCT_ID_LIVE` / `MAYAR_TIER_ID_LIVE`                              | API           | Mayar SaaS membership + tier                         |
-| `MAYAR_WEBHOOK_PATH_SECRET`                                                 | API           | unguessable path segment; additional control         |
-| `MAYAR_RETURN_URL`                                                          | API           | `https://wniseries.ahaqqu.com/checkout/return`       |
-| `TOMTOM_API_KEY`                                                            | API/worker    | server only; traffic                                 |
-| `BMKG_BASE_URL`                                                             | API/worker    | public endpoints; attribution                        |
-| `OPEN_METEO_API_KEY`                                                        | API/worker    | optional fallback; commercial licence                |
-| `LIVE_PROVIDER_MONTHLY_BUDGET_IDR`                                          | API/worker    | hard budget; alert at 80/100%                        |
-| `FEATURE_LIVE_DATA`                                                         | API           | kill switch                                          |
-| `IP_HASH_SALT`                                                              | API           | hash waitlist/security IPs; required in production   |
-| `PLAY_TOKEN_PRIVATE_KEY`                                                    | API           | Ed25519                                              |
-| `PLAY_TOKEN_PUBLIC_KEY`                                                     | game/API      | verify                                               |
-| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | API           | backups/paid assets                                  |
-| `R2_PUBLIC_BUCKET` / `PUBLIC_ASSET_ORIGIN`                                  | API/platform  | public assets; `https://assets.wniseries.ahaqqu.com` |
-| `SENTRY_DSN` / `PUBLIC_SENTRY_DSN`                                          | API/platform  | scrubbed                                             |
-| `CLOUDFLARE_TUNNEL_TOKEN`                                                   | infra         | cloudflared                                          |
-| `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ZONE_ID`                               | CI            | cache purge/deploy                                   |
-| `DEPLOY_ENABLED`                                                            | CI variable   | gate                                                 |
-| `FEATURE_PAYMENTS` / `FEATURE_LEADERBOARD` / `FEATURE_LIVE_DATA`            | API           | kill switches                                        |
+| Variable                                                                    | Scope         | Notes                                                     |
+| --------------------------------------------------------------------------- | ------------- | --------------------------------------------------------- |
+| `NODE_ENV`                                                                  | API           | production/staging/development                            |
+| `PORT`                                                                      | API           | 3000                                                      |
+| `PUBLIC_SITE_URL`                                                           | platform/game | `https://wniseries.ahaqqu.com`                            |
+| `DATABASE_URL`                                                              | API           | `postgres://wni:...@postgres:5432/wni`                    |
+| `BETTER_AUTH_SECRET`                                                        | API           | 32+ bytes                                                 |
+| `BETTER_AUTH_URL`                                                           | API           | site URL                                                  |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`                                 | API           | OAuth                                                     |
+| `RESEND_API_KEY`                                                            | API           | email                                                     |
+| `EMAIL_FROM`                                                                | API           | `no-reply@ahaqqu.com` (verified)                          |
+| `SUPPORT_EMAIL`                                                             | API/platform  | `wniseries@gmail.com`                                     |
+| `MAYAR_ENV`                                                                 | API           | `sandbox` / `production`                                  |
+| `MAYAR_API_KEY`                                                             | API           | server only; 50 req/min                                   |
+| `MAYAR_PRODUCT_ID_ALL_MAPS`                                                 | API           | Mayar invoice/payment product                             |
+| `MAYAR_PRODUCT_ID_LIVE` / `MAYAR_TIER_ID_LIVE`                              | API           | Mayar SaaS membership + tier                              |
+| `MAYAR_WEBHOOK_PATH_SECRET`                                                 | API           | unguessable path segment; additional control              |
+| `MAYAR_RETURN_URL`                                                          | API           | `https://wniseries.ahaqqu.com/checkout/return`            |
+| `TOMTOM_API_KEY`                                                            | API/worker    | server only; traffic                                      |
+| `BMKG_BASE_URL`                                                             | API/worker    | public endpoints; attribution                             |
+| `OPEN_METEO_API_KEY`                                                        | API/worker    | optional fallback; commercial licence                     |
+| `LIVE_PROVIDER_MONTHLY_BUDGET_IDR`                                          | API/worker    | hard budget; alert at 80/100%                             |
+| `FEATURE_LIVE_DATA`                                                         | API           | kill switch                                               |
+| `IP_HASH_SALT`                                                              | API           | hash waitlist/security IPs; required in production        |
+| `PLAY_TOKEN_PRIVATE_KEY`                                                    | API           | Ed25519                                                   |
+| `PLAY_TOKEN_PUBLIC_KEY`                                                     | game/API      | verify                                                    |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | API           | backups/paid assets                                       |
+| `R2_PUBLIC_BUCKET` / `PUBLIC_ASSET_ORIGIN`                                  | API/platform  | public assets; `https://assets.wniseries.ahaqqu.com`      |
+| `SENTRY_DSN` / `PUBLIC_SENTRY_DSN`                                          | API/platform  | scrubbed                                                  |
+| `CLOUDFLARE_TUNNEL_TOKEN`                                                   | infra         | cloudflared                                               |
+| `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ZONE_ID`                               | CI            | cache purge/deploy                                        |
+| `DEPLOY_ENABLED`                                                            | CI variable   | gate                                                      |
+| `FEATURE_PAYMENTS` / `FEATURE_LEADERBOARD` / `FEATURE_LIVE_DATA`            | API           | kill switches                                             |
+| `FEATURE_DAILY_DRAMA`                                                       | API/job       | kill switch; default false until Phase 2D gate            |
+| `AUTO_PUBLISH_DAILY_DRAMA`                                                  | API/job       | **must be false**; deploy invariant                       |
+| `AI_PROVIDER` / `AI_MODEL`                                                  | job           | selected after Phase 2D research                          |
+| `AI_API_KEY`                                                                | job           | server/job only; no client access                         |
+| `AI_MONTHLY_BUDGET_IDR` / `DAILY_DRAMA_CANDIDATE_LIMIT`                     | job           | hard cap + per-day candidate cap                          |
+| `DAILY_DRAMA_SOURCE_ALLOWLIST`                                              | job           | source IDs only; no arbitrary URLs                        |
+| `DRAMA_REVIEW_NOTIFY_EMAIL`                                                 | job           | owner review notification; no candidate body in email     |
+| `DRAMA_PACK_SIGNING_KEY`                                                    | publish job   | Ed25519 private key; rotate with game release             |
+| `R2_DRAMA_STAGING_PREFIX` / `R2_DRAMA_PRODUCTION_PREFIX`                    | job/publish   | separate credentials/prefixes; generator has staging only |
 
 ---
 
 ## 18. Risks and tradeoffs
 
-| Risk                                      | Impact               | Mitigation                                                                          |
-| ----------------------------------------- | -------------------- | ----------------------------------------------------------------------------------- |
-| Single VPS failure                        | Downtime             | Backups, rebuild runbook, Cloudflare, fast restore                                  |
-| Europe latency                            | Slower API           | Static edge cache; offline-first; SLO honest; future APAC migration                 |
-| Mayar KYC delay                           | No revenue           | Apply Phase 0; sandbox; verify individual/PT Perorangan path                        |
-| Mayar no public refund API                | Manual work          | Admin workflow, audit, policy, monthly review                                       |
-| Mayar webhook has no documented signature | Forged callback risk | Never grant from payload; API re-fetch; merchant/product/amount checks; idempotency |
-| Live provider cost overrun                | Margin loss          | Adaptive polling, cache, budget caps, kill switch, weekly review                    |
-| Live data licence/terms                   | Feature blocked      | Written provider terms; source registry; fallback to modeled data                   |
-| No true KRL/TransJakarta crowding         | Overpromise risk     | Label estimates; no “live occupancy”; operator partnership gate                     |
-| City data/transit gaps                    | Phase 3 delay        | Per-city data/licence/recognition gate; do not promise dates                        |
-| Content churn (Karet/Gapeka)              | Wrong content        | Versioned content, refresh drill, no hard-coded schedules                           |
-| Paid asset leakage                        | Revenue loss         | Signed URLs, server gating; accept residual                                         |
-| Cheating                                  | Leaderboard trust    | Deterministic replay, top-100 validation                                            |
-| PDP breach                                | Fines/trust          | Minimization, encryption, 72h runbook, access control                               |
-| Scope creep                               | Delay                | Phase gates, explicit out-of-scope, sub-gates 2A/2B/2C                              |
-| Solo ops burnout                          | Reliability          | Automation, runbooks, managed services where cheap                                  |
+| Risk                                      | Impact               | Mitigation                                                                           |
+| ----------------------------------------- | -------------------- | ------------------------------------------------------------------------------------ |
+| Single VPS failure                        | Downtime             | Backups, rebuild runbook, Cloudflare, fast restore                                   |
+| Europe latency                            | Slower API           | Static edge cache; offline-first; SLO honest; future APAC migration                  |
+| Mayar KYC delay                           | No revenue           | Apply Phase 0; sandbox; verify individual/PT Perorangan path                         |
+| Mayar no public refund API                | Manual work          | Admin workflow, audit, policy, monthly review                                        |
+| Mayar webhook has no documented signature | Forged callback risk | Never grant from payload; API re-fetch; merchant/product/amount checks; idempotency  |
+| Live provider cost overrun                | Margin loss          | Adaptive polling, cache, budget caps, kill switch, weekly review                     |
+| Live data licence/terms                   | Feature blocked      | Written provider terms; source registry; fallback to modeled data                    |
+| No true KRL/TransJakarta crowding         | Overpromise risk     | Label estimates; no “live occupancy”; operator partnership gate                      |
+| City data/transit gaps                    | Phase 3 delay        | Per-city data/licence/recognition gate; do not promise dates                         |
+| Content churn (Karet/Gapeka)              | Wrong content        | Versioned content, refresh drill, no hard-coded schedules                            |
+| Paid asset leakage                        | Revenue loss         | Signed URLs, server gating; accept residual                                          |
+| Cheating                                  | Leaderboard trust    | Deterministic replay, top-100 validation                                             |
+| PDP breach                                | Fines/trust          | Minimization, encryption, 72h runbook, access control                                |
+| Scope creep                               | Delay                | Phase gates, explicit out-of-scope, sub-gates 2A/2B/2C/2D                            |
+| AI daily content harm/defamation          | Legal/human harm     | Source allowlist, anonymisation, human approval, no auto-publish, kill switch        |
+| Daily approval bottleneck                 | Stale content        | Candidate-only automation, mobile review, weekday cadence option, evergreen fallback |
+| Solo ops burnout                          | Reliability          | Automation, runbooks, managed services where cheap                                   |
 
 ---
 
