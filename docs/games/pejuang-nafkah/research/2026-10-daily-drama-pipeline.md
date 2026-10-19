@@ -37,6 +37,22 @@
 
 **“Viral” definition:** a topic/event with measurable public attention (multiple reputable reports, official notice, or licensed trend signal) — not a single anonymous post. The card is based on the **event**, not the post.
 
+### 2.1 Candidate: social signal ingestion (proposed, not approved)
+
+Owner directive (2026-10-19): X, TikTok, and Threads are where viral drama starts and must be in scope. [ADR-0008](../../../adr/0008-social-signal-ingestion.md) records this as a **proposal only** — ADR-0006 and the no-scraping rule stay in force until it is accepted.
+
+What the research has established so far (checked 2026-10-19):
+
+- **No platform sells commercial keyword search.** X is pay-per-use/enterprise with AI-use restrictions; TikTok's Research API is academic; Threads' API has no general search. Commercial search only exists through scraping brokers.
+- **Brokers to compare:** [treg](https://treg.to/web-access) (router over 113 providers; X 167 endpoints, TikTok 193, Threads 18; $0.0001–0.0015 per call; open source), [EnsembleData](https://ensembledata.com/pricing) (8 platforms, Threads keyword search, $100/month minimum), [Apify](https://apify.com/pricing) ($19/month + per-result), Bright Data (enterprise), NewsWhip/Dataminr (licensed, enterprise, monitoring-only).
+- **Estimated cost at our volume** (3 platforms × 10 queries/day): treg ≈ $2–10/month; Apify ≈ $20–40/month; EnsembleData ≈ $100/month. Money is not the constraint.
+- **Threads is the weak platform:** treg carries only 18 Threads endpoints and its social-listening catalogue lists keyword search for X, TikTok, LinkedIn, and Reddit but not Threads. Verify before relying on it.
+- **The legal position does not improve with a broker.** EnsembleData's terms make the client "solely responsible" for compliance and require indemnification. Scraping still breaches platform terms; the broker moves the risk, it does not remove it.
+
+Candidate design, if the owner later accepts the risk: signal-only storage (topic, platform, first seen, velocity, language, URL hash — no text/usernames/media), news confirmation within 24 h before a card is eligible, per-platform caps and kill switches, and no change to the approval flow.
+
+**Blocking questions** (see ADR-0008): Indonesian-language coverage, Threads search feasibility, measured reliability, written legal opinion on ToS/copyright/UU PDP/defamation, vendor retention and sublicensing terms, hoax rate, enforcement risk, and exit path. A 5-day trial must run before acceptance.
+
 ## 3. Daily workflow
 
 ```text

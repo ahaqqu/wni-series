@@ -34,6 +34,7 @@ WNI Series is a multi-game platform. Each game has its own folder under `docs/ga
 6. `architecture.md` — how it is built and operated.
 7. `research/2026-10-refresh.md` — transport/market facts behind the design.
 8. `research/2026-10-live-data-and-mayar.md` — provider access, fees, and live-data cost model.
+9. [`adr/0007`](adr/0007-caching-and-edge-delivery.md) — Postgres-only caching, Cloudflare edge rules for static/JSON, and the Valkey tripwires.
 
 ## Documentation rules
 

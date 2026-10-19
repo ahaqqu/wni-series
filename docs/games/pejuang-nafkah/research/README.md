@@ -13,6 +13,8 @@
 | [2026-10-refresh.md](2026-10-refresh.md)                         | 2026 transport/market/legal refresh; payment section is historical             |
 | [2026-10-live-data-and-mayar.md](2026-10-live-data-and-mayar.md) | Mayar fees/subscriptions, TomTom/BMKG/transit/crowding feasibility, cost model |
 | [2026-10-drama-system.md](2026-10-drama-system.md)               | Drama real-basis/source-bank plan, sensitivity, rarity, share research         |
+| [2026-10-daily-drama-pipeline.md](2026-10-daily-drama-pipeline.md) | Daily research/approval workflow, source and AI policy, dry run, cost        |
+| [2026-10-caching-edge-delivery.md](2026-10-caching-edge-delivery.md) | Postgres vs Valkey, Cloudflare cache rules for JSON, load model, tripwires |
 
 ## Rules
 

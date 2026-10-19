@@ -244,8 +244,9 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 | 2.5  | Mayar webhook receiver + API re-fetch verification                                           | Idempotent grant             |
 | 2.6  | Order/entitlement reconciliation + admin refund/revoke                                       | Runbook + evidence           |
 | 2.7  | All Maps gating in game/content manifests                                                    | Paid maps server-checked     |
+| 2.7a | Cloudflare Cache Rules + headers for `/content/*` and HTML (ADR-0007); verify `cf-cache-status`, prove no rule matches `/api/*` | Edge config + evidence |
 
-**Gate 2A:** All Maps sandbox purchase and duplicate callback produce exactly one entitlement; free route choice enforced; no client unlock; refund/revoke tested; reconciliation zero unexplained.
+**Gate 2A:** All Maps sandbox purchase and duplicate callback produce exactly one entitlement; free route choice enforced; no client unlock; refund/revoke tested; reconciliation zero unexplained; `/content/*` edge-cached with the version in the path and `/api/*` verified uncached.
 
 #### 2B — Live data + Live subscription + planner (5–7 weeks)
 
@@ -339,6 +340,7 @@ A stale brief is a red gate. If research cannot verify a fact or licence, stop a
 | #     | Task                                                                                                                         | Output                           |
 | ----- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | 2D.0  | Research gate: source licences/ToS, AI provider terms/retention, PDP/defamation review, 5-day dry run, cost at 1/3/10 cities | Brief/ADRs + legal note + budget |
+| 2D.0a | Social signal research (ADR-0008, **proposed**): Indonesian coverage on X/TikTok/Threads, Threads search, broker trial, written legal opinion, cost at 1/3/10 cities — accept or reject before any scraping code | Trial report + go/no-go     |
 | 2D.1  | Source adapters + allowlist + no-scraping enforcement                                                                        | Source registry + adapters       |
 | 2D.2  | 00:00 WIB scheduler + candidate cap + retries/backoff                                                                        | Daily job                        |
 | 2D.3  | AI drafting + schema validation + anonymisation/PII/banned-topic checks                                                      | Candidate generator              |

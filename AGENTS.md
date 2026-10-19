@@ -57,7 +57,7 @@ If two documents conflict, stop and ask. If code conflicts with a MUST, the doc 
 - **Tone:** dry, warm, self-deprecating; never misery porn or punching down. Series line: **“Susahnya nyata, dramanya gratis.”** Game line: **“Berangkat. Berjuang. Sampai. Gitu aja terus setiap hari.”** Follow `brand.md`; joke at the situation/system/self, not at victims.
 - **Drama is core, rare, real-basis, fair.** Major drama is not every run; every card needs `realBasis`, ≥2 sources, a `fictionalised` note, and sensitivity review. No real recent tragedy, victims, graphic injury, or identity blame. Drama is never paid or gacha. See [ADR-0005](docs/adr/0005-drama-system.md).
 - **Sharing is local and private.** Share cards use fixed fields + corridor-level location only; no upload, no public feed/UGC, no precise home/work pin, no PII.
-- **Daily drama is candidate-only; no auto-publish.** The 00:00 WIB job may research and draft 3–10 anonymous candidates. The owner approves every card and the final pack; revisions never inherit approval. The generator has no production publish credential. No names/faces/voices/usernames/precise locations/minors/victims/active legal cases/politics/religion/ethnicity. See [ADR-0006](docs/adr/0006-daily-drama-pipeline.md) and [runbook](docs/runbooks/daily-drama.md).
+- **Daily drama is candidate-only; no auto-publish.** The 00:00 WIB job may research and draft 3–10 anonymous candidates. The owner approves every card and the final pack; revisions never inherit approval. The generator has no production publish credential. No names/faces/voices/usernames/precise locations/minors/victims/active legal cases/politics/religion/ethnicity. See [ADR-0006](docs/adr/0006-daily-drama-pipeline.md) and [runbook](docs/runbooks/daily-drama.md). Social-source ingestion (X/TikTok/Threads) is **proposed only** in [ADR-0008](docs/adr/0008-social-signal-ingestion.md); until it is accepted, the no-scraping rule stands.
 - **Performance:** 60 fps target / 30 fps floor; 60 fps marketing motion with reduced-motion fallback.
 - **Live data honesty:** traffic/weather/incidents may be labelled Live; crowding/transit delay are estimated unless an operator feeds them. Never fake live data; freeze a snapshot for each scored run.
 - **Landing honesty:** the site must say pre-alpha, show what exists, and never imply the game is playable or payments are live.
@@ -76,7 +76,9 @@ Never:
 - log emails, tokens, cookies, or full IPs;
 - use `eval`, `unsafe-inline` scripts, wildcard CORS, or unreviewed third-party scripts;
 - let the daily-drama generator publish, hold production credentials, or feed personal data/social posts into prompts;
-- set `AUTO_PUBLISH_DAILY_DRAMA=true` or bypass the owner approval record.
+- set `AUTO_PUBLISH_DAILY_DRAMA=true` or bypass the owner approval record;
+- edge-cache `/api/*`, authenticated JSON, checkout, webhooks, or admin responses, or apply "Cache Everything" to a whole zone;
+- add Valkey/Redis or another shared cache without a measured ADR-0007 tripwire.
 
 Always:
 
