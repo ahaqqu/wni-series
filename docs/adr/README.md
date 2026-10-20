@@ -29,6 +29,8 @@ Research-first requirements and templates: [research protocol](../games/pejuang-
 | [0006](0006-daily-drama-pipeline.md) | Daily AI research with human approval, no auto-publish | Accepted (design) | 2026-10-19 |
 | [0007](0007-caching-and-edge-delivery.md) | Postgres-only caching; Cloudflare edge for static/JSON | Accepted          | 2026-10-19 |
 | [0008](0008-social-signal-ingestion.md) | Social signal ingestion via a scraping broker (candidate) | **Proposed**    | 2026-10-19 |
+| [0009](0009-push-hold-prototype.md) | Standalone push-and-hold prototype (Draft 0) | Accepted (prototype) | 2026-10-20 |
+| [0010](0010-push-hold-arena.md) | Standalone push/hold arena test (1 player, 3 passengers); amended for charge/release hard push, knockdowns, revenge quick shove, camera bystander + viral game over + 1.8× inspect zoom + charge/fall poses | Accepted (prototype) | 2026-10-20 |
 
 Existing architecture summary: [architecture.md](../games/pejuang-nafkah/architecture.md) §3.
 
