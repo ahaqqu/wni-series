@@ -84,6 +84,34 @@ hand-written reset value (`facing = M_PI`) that disagrees with the spawn helper
 for the same spot. Debug-cam `yaw` offsets are relative to facing, so views swap
 180° after the fix — re-check capture scripts.
 
+### Clips play but the mesh explodes while BIND pose is perfect
+Symptom: model renders a clean bind/T-pose with no animation, but any clip turns it
+into noodles/sails — and `animation_build_joint_remap` returns NULL ("1:1").
+Cause: a NULL remap index-drives `palette[i]` from `clip_joint[i]`; if the clip
+covers only a SUBSET of `skins[0].joints` or a different order, every joint after
+the first gap shifts (missing Root/Body at the palette START = total garbage).
+Fix: bake channels for EVERY palette joint in `skins[0].joints` order (rest
+constants for unmapped ones) — see `retarget_clips.py` (`skin_order` writer).
+Verify `clip joint count == palette count` before blaming the engine.
+
+### Poly Pizza re-exports corrupt Quaternius models in HZ
+Symptom: pristine download renders bind garbage (collapsed or inverted) even with
+no clip playing. Cause: Poly Pizza re-exports add ×100 scale nodes on mesh/armature
+and rewrite skin data; HZ's `gltf_unify_skins`/bind-shape pass chokes on it.
+Fix: download from quaternius.com directly (pack pages embed Google Drive folders;
+`scripts/gdrive_fetch.py list|get <folder>` scrapes them) — Quaternius's own `.gltf`
+files (embedded buffers, no scale nodes) render perfectly; convert with
+`scripts/import_quaternius_pack.py`.
+
+### EcsAnimationRef auto-plays WITHOUT a remap
+Symptom: your state machine sets `AnimationState.remap` on every play, yet the mesh
+still shows a garbage index-driven pose. Cause: `EcsAnimationRef` creates the
+`EcsAnimationLayer` and plays the clip WITHOUT a remap (asset-cook.md) — engine and
+game fight over the layer. Fix: never set `EcsAnimationRef` for custom-driven
+avatars; create the layer yourself at spawn:
+`ecs_component_set(..., EcsAnimationLayer, {.layer = animation_layer_create(rig->alloc)})`
+so your system is the only driver.
+
 ### Fixed-step edge detectors fire on time rewinds
 Teleport / R-reset / scene reload rewinds sim time; `t > last` edge detectors
 then fire phantom one-shots (a punch or get-up triggers on reset).

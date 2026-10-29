@@ -106,3 +106,15 @@ nodes are `mixamorig:Hips`; index with both raw and stripped names).
 | Character too short/tall vs source | hips translation not scaled by height ratio |
 | Feet slide while walking in place | source clip has root motion + sim also moves the entity |
 | Cook finds no clips | glb not under an asset root, or referenced path includes `cooked/` or `.hza` extension incorrectly |
+| Bind pose perfect, any clip turns the mesh into noodles | clip does not cover the model palette 1:1 — see below |
+
+## The clip must cover the FULL model palette, in palette order
+
+`AnimationState.remap == NULL` means "clip joint i drives `skins[0].joints[i]`" —
+the engine only builds a name remap when the lists visibly differ, and a clip that
+omits joints at the palette **start** (Quaternius rigs put `Root`, `Body` first)
+shifts every subsequent joint. The writer must therefore emit a channel for **every**
+index of `djs["skins"][0]["joints"]`, iterating that array for order (rest-pose
+constants for joints the retarget didn't map). Check after writing:
+`len(clip joints) == len(model palette)` — `retarget_clips.py` prints
+`N palette joints (M animated)` per clip.

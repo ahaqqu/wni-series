@@ -91,9 +91,14 @@ typedef struct ArenaAvatarRef {
 } ArenaAvatarRef;
 ECS_COMPONENT_TYPEDEF(ArenaAvatarRef);
 
-// shared gameplay_blocks clips (Quaternius humanoid) driven onto the Kaigen bots by joint-name remap
-typedef struct ArenaClips {
+// one clip set per rig family: females = Mixamo-style names (baked arena_retarget),
+// male commuters = Quaternius L-suffixed rig (baked arena_retarget_male)
+typedef struct ArenaClipSet {
   HzHandleT(AnimationBlobAsset) walk, jog, push, punch, hit, death, aim;
+} ArenaClipSet;
+typedef struct ArenaClips {
+  ArenaClipSet female;
+  ArenaClipSet male;
 } ArenaClips;
 ECS_COMPONENT_TYPEDEF(ArenaClips);
 
@@ -146,7 +151,10 @@ hz_internal EcsEntity arena_spawn_char(EcsWorld *w, AssetSystem *assets, CString
   HzHandleT(ModelBlobAsset) model_h = asset_load(ModelBlobAsset, assets, .path = model);
   HzHandleT(AnimationBlobAsset) idle_h = asset_load(AnimationBlobAsset, assets, .path = idle_clip);
   ecs_component_set(w, av, EcsModelRef, {.model = blob_asset_ref_from_handle(ModelBlobAsset, model_h)});
-  ecs_component_set(w, av, EcsAnimationRef, {.animation = blob_asset_ref_from_handle(AnimationBlobAsset, idle_h)});
+  // own the animation layer directly: EcsAnimationRef would auto-play WITHOUT a joint remap,
+  // which misaligns clip joints against the model palette; arena_anim_system is the only driver
+  const ArenaAnimRig *rig = ecs_resource_get(w, ArenaAnimRig);
+  ecs_component_set(w, av, EcsAnimationLayer, {.layer = animation_layer_create(rig->alloc)});
   // no real shadow casting: four skinned casters cost ~25 ms CPU/frame in the shadow pass (measured); a flat disc matches the three.js reference
   ecs_component_set(w, av, EcsVisibility, {.visible = true, .casts_shadow = false});
 
@@ -343,20 +351,26 @@ ecs_system(arena_anim_system, EcsIn(ArenaChar), EcsInOut(ArenaAvatarRef), EcsExt
       force = ref->playing_id != want;
     }
 
+    // male rig vs female rig clip sets (player + filmer are female, worker + student male)
+    const ArenaClipSet *set = (c->role == ARENA_ROLE_PLAYER || c->role == ARENA_ROLE_FILMER) ? &clips->female
+                                                                                              : &clips->male;
     HzHandleT(AnimationBlobAsset) want_h = ref->idle;
     switch (want) {
-    case AANIM_WALK: want_h = clips->walk; break;
-    case AANIM_JOG: want_h = clips->jog; break;
-    case AANIM_PUSH: want_h = clips->push; break;
-    case AANIM_PUNCH: want_h = clips->punch; break;
-    case AANIM_HIT: want_h = clips->hit; break;
+    case AANIM_WALK: want_h = set->walk; break;
+    case AANIM_JOG: want_h = set->jog; break;
+    case AANIM_PUSH: want_h = set->push; break;
+    case AANIM_PUNCH: want_h = set->punch; break;
+    case AANIM_HIT: want_h = set->hit; break;
     case AANIM_FALL:
-    case AANIM_GETUP: want_h = clips->death; break;
-    case AANIM_AIM: want_h = clips->aim; break;
+    case AANIM_GETUP: want_h = set->death; break;
+    case AANIM_AIM: want_h = set->aim; break;
     default: break;
     }
-    if (!asset_is_ready(assets, want_h) || !asset_is_ready(assets, ref->model))
+    if (!asset_is_ready(assets, want_h) || !asset_is_ready(assets, ref->model)) {
+      log_info("anim skip: role=% want=% clip_ready=% model_ready=%", fmt_i32(c->role), fmt_i32(want),
+               fmt_i32(asset_is_ready(assets, want_h)), fmt_i32(asset_is_ready(assets, ref->model)));
       continue;
+    }
     AnimationBlobAsset *want_blob = asset_get(assets, want_h, AnimationBlobAsset);
     ModelBlobAsset *model_blob = asset_get(assets, ref->model, ModelBlobAsset);
     if (!want_blob || !model_blob)
@@ -370,8 +384,13 @@ ecs_system(arena_anim_system, EcsIn(ArenaChar), EcsInOut(ArenaAvatarRef), EcsExt
     f32 fade = (want == AANIM_FALL) ? 0.10f : (want == AANIM_GETUP ? 0.30f : 0.18f);
     animation_layer_play_ex(&al->layer, want_blob, ANIM_TRANSITION_CROSSFADE, fade, want_speed, want_loop, want_start);
     AnimationState *st = animation_layer_state(&al->layer, animation_layer_state_count(&al->layer) - 1);
-    if (st && !handle_equals(want_h, ref->idle))
+    // ALWAYS build: NULL remap = clip drives model joints 1:1 by INDEX, which only holds for
+    // clips cooked in model joint order — Quaternius embedded clips key channels in animator
+    // order and skin the mesh garbage without the name remap (build returns NULL when truly 1:1)
+    if (st)
       st->remap = animation_build_joint_remap(rig->alloc, want_blob, model_blob);
+    log_info("anim play: role=% want=% idle_clip=% remap=%", fmt_i32(c->role), fmt_i32(want),
+             fmt_i32(handle_equals(want_h, ref->idle)), fmt_i32(st != 0 && st->remap != 0));
     ref->playing_id = want;
   }
 }
@@ -874,34 +893,48 @@ hz_internal void game_sim_init(GameSim *sim, EcsWorld *w, AssetSystem *assets, A
   arena_state_fresh(&arena_gs);
   ecs_resource_set(w, ArenaGameState, arena_gs);
   ecs_resource_set(w, ArenaAnimRig, {.alloc = alloc});
-  // retargeted clips (scripts/retarget_clips.py): authored on the UE-style rig, baked onto the
-// Kaigen bot's Mixamo skeleton — joint names now match 1:1, no engine-side remap fallback
+  // retargeted action clips (scripts/retarget_clips.py male): UE-rig source baked onto the
+  // Quaternius modular rig — all four commuter characters share that rig, so ONE clip set
   ecs_resource_set(w, ArenaClips,
-                   {.walk = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget/actions/Walk_Loop.hza"),
-                    .jog = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget/actions/Jog_Fwd_Loop.hza"),
-                    .push = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget/actions/Push_Loop.hza"),
-                    .punch = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget/actions/Punch_Jab.hza"),
-                    .hit = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget/actions/Hit_Chest.hza"),
-                    .death = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget/actions/Death01.hza"),
-                    .aim = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget/actions/Pistol_Aim_Neutral.hza")});
+                   {.female = {
+                        .walk = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Walk_Loop.hza"),
+                        .jog = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Jog_Fwd_Loop.hza"),
+                        .push = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Push_Loop.hza"),
+                        .punch = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Punch_Jab.hza"),
+                        .hit = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Hit_Chest.hza"),
+                        .death = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Death01.hza"),
+                        .aim = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Pistol_Aim_Neutral.hza"),
+                    },
+                    .male = {
+                        .walk = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Walk_Loop.hza"),
+                        .jog = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Jog_Fwd_Loop.hza"),
+                        .push = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Push_Loop.hza"),
+                        .punch = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Punch_Jab.hza"),
+                        .hit = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Hit_Chest.hza"),
+                        .death = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Death01.hza"),
+                        .aim = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Pistol_Aim_Neutral.hza"),
+                    }});
 
   // spawns mirror createArenaState() in the three.js sim: player (0,3), worker (-2.3,-0.7), student (2.35,0.35), shopper (0,-2.85)
+  // Quaternius Ultimate Modular packs (CC0, quaternius.com) imported + recolored to Indonesian
+  // commuter skins by scripts/import_quaternius_pack.py; idle = retargeted clip (same rig)
+  CString pack_idle = "arena_retarget_male/actions/Idle_Loop.hza";
   v3 player_at = {0.0f, 0.0f, 3.0f};
   sim->player = arena_spawn_char(w, assets, "Player", 0, player_at, 1.05f, 1.0f,
                                  arena_face_toward(player_at.x, player_at.z, 0.0f, 0.0f),
-                                 ARENA_AVATAR_FEMALE ".glb", ARENA_AVATAR_FEMALE "/Idle_Loop.hza");
+                                 "arena_commuter/female_commuter.glb", pack_idle);
   v3 worker_at = {-2.3f, 0.0f, -0.7f};
   arena_spawn_char(w, assets, "Worker", 1, worker_at, 1.32f, 1.10f,
                    arena_face_toward(worker_at.x, worker_at.z, player_at.x, player_at.z),
-                   ARENA_AVATAR_MALE ".glb", ARENA_AVATAR_MALE "/Idle_Loop.hza");
+                   "arena_commuter/male_casual.glb", pack_idle);
   v3 student_at = {2.35f, 0.0f, 0.35f};
   arena_spawn_char(w, assets, "Student", 2, student_at, 0.88f, 0.92f,
                    arena_face_toward(student_at.x, student_at.z, player_at.x, player_at.z),
-                   ARENA_AVATAR_MALE ".glb", ARENA_AVATAR_MALE "/Idle_Loop.hza");
+                   "arena_commuter/male_hoodie.glb", pack_idle);
   v3 shopper_at = {0.0f, 0.0f, -2.85f};
   arena_spawn_char(w, assets, "Shopper", 3, shopper_at, 1.0f, 1.0f,
                    arena_face_toward(shopper_at.x, shopper_at.z, player_at.x, player_at.z),
-                   ARENA_AVATAR_FEMALE ".glb", ARENA_AVATAR_FEMALE "/Idle_Loop.hza");
+                   "arena_commuter/female_hijab.glb", pack_idle);
   (void)assets;
 }
 

@@ -10,6 +10,9 @@ ROOT = r"C:\Users\angga\XiaomiMiMoProjects\WNI Pejuang Nafkah\kaigen-arena"
 SRC = ROOT + r"\gameplay_blocks\assets\gameplay_blocks\character\default_character.glb"
 DST = ROOT + r"\assets\starting_template\characters\kaigen_bot.glb"
 OUT = ROOT + r"\assets\arena_retarget\actions.glb"
+# "male" profile: same source clips baked onto the Quaternius commuter rig
+# (assets/arena_commuter/male_casual.glb — hoodie shares the identical skeleton)
+PROFILE = sys.argv[1] if len(sys.argv) > 1 else "bot"
 
 MAP = {
     "pelvis": "Hips",
@@ -25,6 +28,27 @@ for f in ["index", "middle", "ring", "pinky", "thumb"]:
         for n in range(1, 4):
             MAP[f"{f}_{n:02d}_{side}"] = f"{m}Hand{f.capitalize()}{n}"
         MAP[f"{f}_04_leaf_{side}"] = f"{m}Hand{f.capitalize()}4"
+
+MAP_MALE = {
+    "pelvis": "Hips",
+    "spine_01": "Abdomen", "spine_02": "Torso", "spine_03": "Chest",
+    "neck_01": "Neck", "Head": "Head",
+    "clavicle_l": "Shoulder.L", "upperarm_l": "UpperArm.L", "lowerarm_l": "LowerArm.L", "hand_l": "Wrist.L",
+    "clavicle_r": "Shoulder.R", "upperarm_r": "UpperArm.R", "lowerarm_r": "LowerArm.R", "hand_r": "Wrist.R",
+    "thigh_l": "UpperLeg.L", "calf_l": "LowerLeg.L", "foot_l": "Foot.L", "ball_l": "PT.L",
+    "thigh_r": "UpperLeg.R", "calf_r": "LowerLeg.R", "foot_r": "Foot.R", "ball_r": "PT.R",
+}
+for f in ["index", "middle", "ring", "pinky", "thumb"]:
+    for side, s in [("l", "L"), ("r", "R")]:
+        for n in range(1, 4):
+            MAP_MALE[f"{f}_{n:02d}_{side}"] = f"{f.capitalize()}{n}.{s}"
+        if f != "thumb":  # casual thumb stops at Thumb3 (no 4th phalanx node)
+            MAP_MALE[f"{f}_04_leaf_{side}"] = f"{f.capitalize()}4.{s}"
+
+if PROFILE == "male":
+    DST = ROOT + r"\assets\arena_commuter\male_casual.glb"
+    OUT = ROOT + r"\assets\arena_retarget_male\actions.glb"
+    MAP = MAP_MALE
 
 def load_glb(path):
     d = open(path, "rb").read()
@@ -120,6 +144,7 @@ def main():
     missing = [v for v in MAP.values() if v not in dname2i]
     if missing: sys.exit("map targets missing in bot: " + str(missing))
     skin_joints = set(djs["skins"][0]["joints"])
+    skin_order = djs["skins"][0]["joints"]  # model palette order — clips must cover it exactly
     print(f"mapped {len(MAP)} joints; skin joints {len(skin_joints)}")
 
     hips_s = sworld[sname2i["pelvis"]][:3, 3]
@@ -291,11 +316,17 @@ def main():
                 out_R[di] = np.tile(dlocals[di][1], (nf, 1, 1))
                 out_T[di] = np.tile(dlocals[di][0], (nf, 1))
                 out_W[di] = W
-        # rotation channels: skin joints only, excluding pure-rest ones we didn't map? include all
-        # skin joints: mapped (animated) + unmapped (static rest -> constant, skip to save space)
-        animated = {di: (out_R[di], out_T[di]) for di in botW}
-        baked.append((anim["name"], times, animated))
-        print(f"  {anim['name']}: {nf} frames, {len(animated)} animated joints")
+        # channels for EVERY skin joint in palette (skin.joints) order, rest constants for
+        # unmapped ones: a clip covering a strict subset leaves the engine's NULL "1:1" fast
+        # path index-driving the palette (Root/Body sit at the START -> whole-body garbage)
+        full = {}
+        for di in skin_order:
+            if di in botW:
+                full[di] = (out_R[di], out_T[di])
+            else:
+                full[di] = (np.tile(dlocals[di][1], (nf, 1, 1)), np.tile(dlocals[di][0], (nf, 1)))
+        baked.append((anim["name"], times, full))
+        print(f"  {anim['name']}: {nf} frames, {len(full)} palette joints ({len(botW)} animated)")
 
     # --- write glb: bot JSON + new animations ---
     out = {k: v for k, v in djs.items() if k not in ("animations", "samplers", "accessors", "bufferViews", "buffers")}
@@ -313,7 +344,7 @@ def main():
                      "min": [float(times[0])], "max": [float(times[-1])]})
         t_acc = len(accs) - 1
         c0, s0 = len(chans), len(sams)
-        for di in sorted(animated):
+        for di in animated:  # insertion order == skin.joints palette order
             Rf, Tf = animated[di]
             qs = np.array([m_to_q(Rf[k]) for k in range(nf)])
             for k in range(1, nf):
