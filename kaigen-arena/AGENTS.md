@@ -60,6 +60,10 @@ User projects are ITERATIVE. The loop is: small change -> `hz/hzbuild run --comm
 
 The entire codebase is indexed in wiki/index.md. This index.md is your entrypoint to find anything you need in this codebase.
 
+**Game reference:** `REFERENCE.md` (this directory) documents the arena mechanics,
+code map, character/animation pipelines, verification baseline, and a regeneration
+checklist for the Kaigen port — read it before changing gameplay or characters.
+
 ## Hard rules (true invariants — never break these)
 
 - NEVER use the C standard library, `malloc`/`calloc`/`alloca`, or inline
