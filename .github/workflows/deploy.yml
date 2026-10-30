@@ -58,7 +58,7 @@ jobs:
           docker build -t "ghcr.io/${{ github.repository_owner }}/wni-api:${GITHUB_SHA}" services/api
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
