@@ -1,6 +1,6 @@
 type MaterialBlobAsset
 version 23
-generated a63ff84df9bdcd49
+generated b4f8da5b8185a4cf
 ---
 shader_source "/shaders/renderer/standard.glsl" ShaderVariantBlobAsset
 depth_test true
@@ -25,9 +25,9 @@ properties 8
   name "color"
   type MAT_PROP_COLOR4
   c4
-    r 0.6342527
-    g 0.5010346
-    b 0.37342674
+    r 0.7083696
+    g 0.5838315
+    b 0.45533064
     a 1.000000
 
   name "metallic"
