@@ -76,6 +76,8 @@ Full table: `starting_template.c` `#define ARENA_*` block (~line 190).
   - `arena_cam:<dist>[:yaw_deg]` — follow cam on the player, re-set every frame in
     `app_update_and_render` (aim 1.05 m chest, 0.35 m for fall/getup); yaw is
     relative to the player's facing; empty arg clears.
+  - `arena_crowd:<n>` — n walk-in-place commuters in a ring (streamed 6/frame);
+    the 50-char skinning/draw stress test.
 
 ## 3. Character rendering
 
@@ -97,6 +99,18 @@ Indonesian look = **recolor only** (glTF `baseColorFactor` is LINEAR):
 material recolored (no hijab geometry); `_probe_mats.py <glb>` prints
 material → y-range so regions can be re-mapped after a pack change.
 
+Post-import GLB surgery (run in this order after `import_quaternius_pack.py`):
+
+1. `scripts/add_face.py` — eyes/brows/mouth spheres weighted 1.0 to `Head`
+   (the pack's UVs are degenerate — every vertex at (0,1) — so painted faces
+   cannot land) + a distinct skin tone per character.
+2. `scripts/fix_leg_hierarchy.py` — the pack hangs `Foot.L/R` off `Root`
+   instead of `LowerLeg.*`; reparents them preserving world transforms so
+   `ik_chain_build` can close hip→knee→ankle. **Must run before
+   `retarget_clips.py`** (the retarget bakes locals over the target tree).
+3. `scripts/retarget_clips.py male` — rebake the action clips.
+4. `hz\hzbuild cook`.
+
 ### Regenerating models from scratch
 
 1. Pack pages on quaternius.com embed Google Drive folders:
@@ -109,9 +123,42 @@ material → y-range so regions can be re-mapped after a pack change.
 
 ### Render rules (measured — do not "fix")
 
-- `casts_shadow = false` on avatars + flat blob discs (cylinder scale 1.24):
-  4 skinned shadow casters cost ~25 ms CPU/frame; discs cost nothing.
+- `casts_shadow = false` on avatars + soft radial-gradient contact shadows
+  (`arena/blob_soft_mat.hzt` + `arena/textures/blob_shadow.png` on a flat
+  plane): 4 skinned shadow casters cost ~25 ms CPU/frame; gradient discs cost
+  nothing and read as grounded at close range.
 - Models are ~1.85 m; spawn scales in the table above balance the cast.
+- Face parts (eyes/brows/mouth) are 3 extra primitives per head from
+  `scripts/add_face.py` — no texture memory, no UVs needed.
+
+### IK (foot plant + gaze) — engine `ecs_ik`, wired in `arena_spawn_char`
+
+- `EcsIkFootPlant` on each avatar: `UpperLeg.L/R → Foot.L/R`, root `Hips`,
+  ground = `ecs_ik_foot_plant_add_plane(..., 0.0f)` (flat pad, **no raycasts** —
+  the crowd-scale budget). `foot_height` is measured from the bind pose once the
+  model is ready (`arena_anim_system`, `ik_tuned` flag).
+- `EcsIkGaze` on `Head` (+Z forward); targets written per frame by
+  `arena_anim_system`: NPCs watch the player, the player watches the aggressor
+  when standing (inactive while moving or fallen).
+- Schedule seam (must be exact): `ecs_ik_resolve_schedule` →
+  `ecs_renderer_schedule_pose` → `ecs_ik_schedule` → `ecs_renderer_schedule_skin`.
+  `ecs_ik_reset` on every R-reset (the anim system detects the time rewind).
+- Pelvis tuning: `max_pelvis_drop 0.05`, `heel_lift_ratio 0.6`, `soften 0.35` —
+  without them the plant drops the pelvis into a horse-stance crouch.
+
+### Motion quality (arena_anim_system)
+
+- Locomotion is two-speed and **rate-synced**: walk/jog clip playback
+  `speed = clamp(actual / ARENA_WALK_CLIP_SPEED|ARENA_JOG_CLIP_SPEED, 0.55, 1.8)`.
+- Facing turns toward `facing_target` at `ARENA_TURN_RATE` (7 rad/s) instead of
+  snapping; push impact still snaps (reads as a hit).
+- Loop↔loop transitions use `ANIM_TRANSITION_INERTIALIZE`; one-shots stay
+  CROSSFADE. Idle gets a 6 mm breathing bob on the avatar root.
+- `arena_crowd:<n>` spawns n walk-in-place commuters in a ring (streamed 6/frame)
+  for skinning/draw stress. **Perf at 54 skinned chars (desktop RTX 4070):**
+  cpu 2.9 ms, gpu 0.46 ms, 129 draws, 357k tris, 60 fps. The enabler is
+  `RendererInitDesc.max_bones = 4096` (the 1024 default asserts at ~16 bodies —
+  62 joints each).
 
 ## 4. Animation pipeline
 
@@ -180,7 +227,8 @@ face the player), push lunge, fall flat, get-up, and one live (no-force) capture
 2. `hz\hzbuild cook` — cooks committed assets (commuter models, retarget sets,
    gameplay_blocks source).
 3. `hz\hzbuild --release` — builds; if models/clips changed, re-run the Python
-   scripts first (`import_quaternius_pack.py`, `retarget_clips.py male`).
+   scripts first, **in this order**: `import_quaternius_pack.py` →
+   `add_face.py` → `fix_leg_hierarchy.py` → `retarget_clips.py male`.
 4. Run the verification baseline (§5).
 5. If adding a state/clip: extend `ArenaClipSet`, bake into
    `arena_retarget_male` (full palette!), map it in the anim priority block.

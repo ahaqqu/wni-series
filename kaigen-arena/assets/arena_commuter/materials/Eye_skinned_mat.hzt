@@ -1,12 +1,12 @@
 type MaterialBlobAsset
 version 23
-generated 976e1d780a788408
+generated 5c729929dfda2eb0
 ---
 shader_source "/shaders/renderer/standard.glsl" ShaderVariantBlobAsset
 depth_test true
 depth_write true
 depth_compare GPU_COMPARE_GREATER_EQUAL
-cull_mode GPU_CULL_NONE
+cull_mode GPU_CULL_BACK
 is_transparent false
 alpha_cutoff false
 alpha_to_coverage false
@@ -25,9 +25,9 @@ properties 8
   name "color"
   type MAT_PROP_COLOR4
   c4
-    r 0.19332159
-    g 0.14356303
-    b 0.107989885
+    r 0.2600675
+    g 0.19641912
+    b 0.16007763
     a 1.000000
 
   name "metallic"
@@ -36,7 +36,7 @@ properties 8
 
   name "smoothness"
   type MAT_PROP_FLOAT
-  f 0.500000
+  f 0.620000
 
   name "emission_color"
   type MAT_PROP_COLOR4

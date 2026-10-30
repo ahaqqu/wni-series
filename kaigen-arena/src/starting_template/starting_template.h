@@ -25,7 +25,8 @@ ECS_COMPONENT(ArenaChar) {
   f32 x, z; // live position, sim-authoritative (transforms follow it each step)
   f32 home_x, home_z;
   f32 vx, vz;
-  f32 facing; // yaw: model +Z forward
+  f32 facing; // yaw: model +Z forward, smoothed toward facing_target each step
+  f32 facing_target; // desired yaw from steering; facing turns toward it at a capped rate
   f32 stagger, fallen, hit_flash;
   f32 anger, revenge_delay, attack_cooldown, windup;
   b32 revenge;
