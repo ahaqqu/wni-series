@@ -6,6 +6,7 @@
 #include "ecs/camera/ecs_camera.h"
 #include "ecs/ecs_assets/ecs_assets.h"
 #include "ecs/ecs_editor/ecs_editor.h"
+#include "ecs/ecs_ik/ecs_ik.h"
 #include "ecs/ecs_physics/ecs_physics.h"
 #include "ecs/ecs_rigidbody/ecs_rigidbody.h"
 #include "ecs/input/ecs_input.h"
@@ -88,6 +89,7 @@ typedef struct ArenaAvatarRef {
   f32 prev_fallen;
   i32 prev_pushes;
   f32 prev_time; // detect an R reset (the sim clock rewound) and skip edge triggers
+  b32 ik_tuned;  // foot_height measured from the bind pose once the model is ready
 } ArenaAvatarRef;
 ECS_COMPONENT_TYPEDEF(ArenaAvatarRef);
 
@@ -121,6 +123,8 @@ enum {
 };
 
 // yaw facing +Z-forward toward a point, same convention as the three.js sim
+hz_internal f32 arena_len(f32 x, f32 z); // arena_sim below; used by the anim system's speed sync
+
 hz_internal f32 arena_face_toward(f32 from_x, f32 from_z, f32 to_x, f32 to_z) {
   f32 dx = to_x - from_x;
   f32 dz = to_z - from_z;
@@ -143,7 +147,8 @@ hz_internal EcsEntity arena_spawn_char(EcsWorld *w, AssetSystem *assets, CString
                      .z = feet.z,
                      .home_x = feet.x,
                      .home_z = feet.z,
-                     .facing = facing});
+                     .facing = facing,
+                     .facing_target = facing});
 
   EcsEntity av = ecs_entity_create(w);
   ecs_component_set(w, av, EcsParent, {.parent = e});
@@ -158,11 +163,47 @@ hz_internal EcsEntity arena_spawn_char(EcsWorld *w, AssetSystem *assets, CString
   // no real shadow casting: four skinned casters cost ~25 ms CPU/frame in the shadow pass (measured); a flat disc matches the three.js reference
   ecs_component_set(w, av, EcsVisibility, {.visible = true, .casts_shadow = false});
 
+  // feet plant on the arena pad (flat plane, no raycasts) and the head tracks the action; joints are the Quaternius modular rig
+  EcsIkFootPlant fp = {0};
+  fp.legs.len = 2;
+  fp.legs.items[0].hip_joint = fixedstr64_from_cstr("UpperLeg.L");
+  fp.legs.items[0].ankle_joint = fixedstr64_from_cstr("Foot.L");
+  fp.legs.items[1].hip_joint = fixedstr64_from_cstr("UpperLeg.R");
+  fp.legs.items[1].ankle_joint = fixedstr64_from_cstr("Foot.R");
+  fp.root_joint = fixedstr64_from_cstr("Hips");
+  fp.plant = ik_foot_plant_defaults();
+  fp.plant.foot_height = 0.0f; // filled from the bind pose once the model is ready
+  fp.plant.heel_lift_ratio = 0.6f;      // lift the heel rather than drop the pelvis
+  fp.plant.max_pelvis_drop = 0.05f;     // a standing character must not sink into a crouch
+  fp.plant.pelvis_rebalance_weight = 0.0f;
+  fp.soften = 0.35f; // blend toward the animated pose; plants still lock, small mismatches don't
+  fp.pole_kind = (u32)IK_POLE_DIRECTION;
+  fp.pole = (v3){0.0f, 0.0f, 1.0f}; // knees forward in the hip's frame
+  ecs_ik_foot_plant_add_plane(w, av, &fp, 0.0f);
+
+  EcsIkGaze gz = {0};
+  gz.joint = fixedstr64_from_cstr("Head");
+  gz.forward_axis = (v3){0.0f, 0.0f, 1.0f}; // models face +Z
+  gz.up_axis = (v3){0.0f, 1.0f, 0.0f};
+  gz.limit.kind = IK_LIMIT_CONE;
+  gz.limit.swing_max = 0.85f;
+  gz.limit.softness = 0.35f;
+  gz.weight = 1.0f;
+  gz.max_angle = 0.55f;
+  gz.interpolation_time = 0.30f;
+  gz.move_threshold = 0.08f;
+  gz.primary_axis = (v3){0.0f, 1.0f, 0.0f};
+  ecs_component_set(w, av, EcsIkGaze, gz);
+
   EcsEntity disc = ecs_entity_create(w);
   ecs_component_set(w, disc, EcsParent, {.parent = e});
-  ecs_component_set(w, disc, LocalTransform, {.position = {0.0f, 0.05f, 0.0f}, .rotation = quat_identity(), .scale = (v3){1.24f, 0.01f, 1.24f}});
-  ecs_component_set(w, disc, EcsModelRef, {.model = blob_asset_ref_from_handle(ModelBlobAsset, asset_load(ModelBlobAsset, assets, .path = "engine/primitives/cylinder/cylinder.hza"))});
-  ecs_component_set(w, disc, EcsMaterial, {.material = blob_asset_ref_from_handle(MaterialBlobAsset, asset_load(MaterialBlobAsset, assets, .path = "arena/blob_shadow_mat.hzt"))});
+  // soft radial-gradient contact shadow (flat cylinder read as a sticker at close range)
+  ecs_component_set(w, disc, LocalTransform,
+                    {.position = {0.0f, 0.03f, 0.0f},
+                     .rotation = quat_axis_angle((v3){1.0f, 0.0f, 0.0f}, -(f32)M_PI * 0.5f),
+                     .scale = (v3){1.24f, 1.24f, 1.0f}});
+  ecs_component_set(w, disc, EcsModelRef, {.model = blob_asset_ref_from_handle(ModelBlobAsset, asset_load(ModelBlobAsset, assets, .path = "engine/primitives/plane/plane.hza"))});
+  ecs_component_set(w, disc, EcsMaterial, {.material = blob_asset_ref_from_handle(MaterialBlobAsset, asset_load(MaterialBlobAsset, assets, .path = "arena/blob_soft_mat.hzt"))});
   ecs_component_set(w, disc, EcsVisibility, {.visible = true, .casts_shadow = false});
 
   ecs_component_set(w, e, ArenaAvatarRef, {.avatar = av, .idle = idle_h, .model = model_h, .playing_id = -1, .one_shot = -1});
@@ -192,6 +233,9 @@ ecs_system(camera_target_system, EcsInOut(CameraFollow), EcsResIn(ArenaFocusRef)
 #define ARENA_BODY_RADIUS 0.34f
 #define ARENA_CONTACT_RADIUS 0.62f // playerRadius 0.28 + bodyRadius 0.34
 #define ARENA_MOVE_SPEED 3.1f
+#define ARENA_WALK_CLIP_SPEED 1.35f // m/s Walk_Loop was authored at; playback rate = speed / this
+#define ARENA_JOG_CLIP_SPEED 3.1f   // m/s Jog_Fwd_Loop was authored at
+#define ARENA_TURN_RATE 7.0f        // rad/s the body turns toward facing_target
 #define ARENA_FRICTION 6.2f
 #define ARENA_PUSH_REACH 1.5f
 #define ARENA_PUSH_COOLDOWN 0.45f
@@ -278,6 +322,22 @@ ecs_system(arena_anim_system, EcsIn(ArenaChar), EcsInOut(ArenaAvatarRef), EcsExt
   const PlayerControls *ctl = ecs_sys_get_resource(PlayerControls);
   f32 step = it->delta_time;
 
+  // gaze anchors: NPCs watch the player, the player watches the aggressor when standing
+  f32 px = 0.0f, pz = 0.0f, fx = 0.0f, fz = 0.0f;
+  b32 have_p = false, have_f = false;
+  for (i32 i = 0; i < it->count; i++) {
+    const ArenaChar *cc = ecs_sys_get_component(ArenaChar, i);
+    if (cc->role == ARENA_ROLE_PLAYER) {
+      px = cc->x;
+      pz = cc->z;
+      have_p = true;
+    } else if (cc->role == ARENA_ROLE_AGGRESSIVE) {
+      fx = cc->x;
+      fz = cc->z;
+      have_f = true;
+    }
+  }
+
   for (i32 i = 0; i < it->count; i++) {
     const ArenaChar *c = ecs_sys_get_component(ArenaChar, i);
     ArenaAvatarRef *ref = ecs_sys_get_component_mut(ArenaAvatarRef, i);
@@ -289,6 +349,8 @@ ecs_system(arena_anim_system, EcsIn(ArenaChar), EcsInOut(ArenaAvatarRef), EcsExt
     b32 force = false;
     b32 reset = g->time < ref->prev_time;
     ref->prev_time = g->time;
+    if (reset)
+      ecs_ik_reset(it->world, ref->avatar); // a rewind teleports: stale foot speed breaks every plant
     if (!reset && ref->prev_fallen > 0.0f && c->fallen <= 0.0f) {
       ref->one_shot = AANIM_GETUP;
       ref->one_shot_t = 0.9f;
@@ -331,9 +393,19 @@ ecs_system(arena_anim_system, EcsIn(ArenaChar), EcsInOut(ArenaAvatarRef), EcsExt
     } else if (c->windup > 0.0f) {
       want = AANIM_PUSH;
     } else {
-      f32 sp2 = c->role == 0 ? ctl->move.x * ctl->move.x + ctl->move.y * ctl->move.y : c->vx * c->vx + c->vz * c->vz;
-      if (sp2 > 0.09f)
-        want = c->role == 0 ? AANIM_JOG : AANIM_WALK;
+      f32 sp = arena_len(c->vx, c->vz);
+      if (c->role == 0)
+        sp = arena_len(ctl->move.x, ctl->move.y) * ARENA_MOVE_SPEED;
+      if (sp > 0.3f) {
+        // two-speed locomotion, rate-synced to the real speed so stride matches travel
+        if (sp > 2.0f) {
+          want = AANIM_JOG;
+          want_speed = m_minf(1.8f, m_maxf(0.55f, sp / ARENA_JOG_CLIP_SPEED));
+        } else {
+          want = AANIM_WALK;
+          want_speed = m_minf(1.8f, m_maxf(0.55f, sp / ARENA_WALK_CLIP_SPEED));
+        }
+      }
     }
 
     if (g->game_over)
@@ -378,19 +450,67 @@ ecs_system(arena_anim_system, EcsIn(ArenaChar), EcsInOut(ArenaAvatarRef), EcsExt
     if (want == AANIM_GETUP)
       want_start = want_blob->length; // count down from the clip's end
 
-    if (ref->playing_id == want && !force)
-      continue;
+    if (!ref->ik_tuned) {
+      // foot_height comes from the rig's bind pose so planted feet sit ON the pad, not above it
+      u32 jc = blob_array_len(&model_blob->joints);
+      TempAllocator temp = tctx_temp_allocator_begin(NULL);
+      JointPose *bind = ALLOC_ARRAY(&temp.allocator, JointPose, jc);
+      animation_fill_bind_local_pose(model_blob, bind, jc);
+      i32 ankle = ik_joint_find(model_blob, "Foot.L");
+      if (ankle >= 0) {
+        EcsIkFootPlant *fpc = ecs_component_get_mut(it->world, ref->avatar, EcsIkFootPlant);
+        if (fpc) {
+          fpc->plant.foot_height = ik_joint_global_pose(bind, model_blob, (u32)ankle).translation.y;
+          ref->ik_tuned = true;
+        }
+      }
+      animation_layer_ensure_buffers(&al->layer, jc); // inertialize history
+      tctx_temp_allocator_end(temp);
+    }
 
-    f32 fade = (want == AANIM_FALL) ? 0.10f : (want == AANIM_GETUP ? 0.30f : 0.18f);
-    animation_layer_play_ex(&al->layer, want_blob, ANIM_TRANSITION_CROSSFADE, fade, want_speed, want_loop, want_start);
+    // gaze + breathing: the cheap aliveness layer on top of the clips
+    EcsIkGazeTarget *gaze = ecs_component_get_mut(it->world, ref->avatar, EcsIkGazeTarget);
+    if (gaze) {
+      b32 moving = want == AANIM_WALK || want == AANIM_JOG;
+      if (c->fallen > 0.0f || (c->role == 0 && moving)) {
+        gaze->active = false;
+      } else if (c->role == 0 && have_f) {
+        gaze->target = (v3){fx, 1.5f, fz};
+        gaze->active = true;
+      } else if (c->role != 0 && have_p) {
+        gaze->target = (v3){px, 1.5f, pz};
+        gaze->active = true;
+      } else {
+        gaze->active = false;
+      }
+    }
+    LocalTransform *av_lt = ecs_component_get_mut(it->world, ref->avatar, LocalTransform);
+    if (av_lt && want == AANIM_IDLE && c->fallen <= 0.0f)
+      av_lt->position.y = 0.006f * m_sinf(g->time * 1.9f + c->role * 1.7f);
+
+    if (ref->playing_id == want && !force) {
+      // still moving: keep the settled clip's rate locked to the live speed
+      if (want == AANIM_WALK || want == AANIM_JOG) {
+        u32 cur = al->layer.current_index;
+        if (cur < animation_layer_state_count(&al->layer)) {
+          AnimationState *st = animation_layer_state(&al->layer, cur);
+          if (st && st->animation == want_blob)
+            st->speed = want_speed;
+        }
+      }
+      continue;
+    }
+
+    b32 one_shot_clip = (want == AANIM_FALL || want == AANIM_GETUP || want == AANIM_PUNCH || want == AANIM_HIT);
+    AnimTransitionMode tmode = one_shot_clip ? ANIM_TRANSITION_CROSSFADE : ANIM_TRANSITION_INERTIALIZE;
+    f32 fade = (want == AANIM_FALL) ? 0.10f : (want == AANIM_GETUP ? 0.30f : (one_shot_clip ? 0.18f : 0.22f));
+    animation_layer_play_ex(&al->layer, want_blob, tmode, fade, want_speed, want_loop, want_start);
     AnimationState *st = animation_layer_state(&al->layer, animation_layer_state_count(&al->layer) - 1);
     // ALWAYS build: NULL remap = clip drives model joints 1:1 by INDEX, which only holds for
     // clips cooked in model joint order — Quaternius embedded clips key channels in animator
     // order and skin the mesh garbage without the name remap (build returns NULL when truly 1:1)
     if (st)
       st->remap = animation_build_joint_remap(rig->alloc, want_blob, model_blob);
-    log_info("anim play: role=% want=% idle_clip=% remap=%", fmt_i32(c->role), fmt_i32(want),
-             fmt_i32(handle_equals(want_h, ref->idle)), fmt_i32(st != 0 && st->remap != 0));
     ref->playing_id = want;
   }
 }
@@ -498,7 +618,7 @@ hz_internal void arena_perform_push(ArenaGameState *g, ArenaChar *player, ArenaC
   f32 lunge = hard ? ARENA_HARD_PUSH_LUNGE : ARENA_PUSH_LUNGE;
   player->x += nx * lunge;
   player->z += nz * lunge;
-  player->facing = m_atan2f(nx, nz);
+  player->facing = player->facing_target = m_atan2f(nx, nz); // impact snaps the facing
   g->pushes += 1;
   g->last_push_hard = hard;
 
@@ -617,7 +737,7 @@ hz_internal void arena_reset_bodies(ArenaChar **by_role) {
   p->x = ARENA_RESET_PLAYER_X;
   p->z = ARENA_RESET_PLAYER_Z;
   p->vx = p->vz = 0.0f;
-  p->facing = M_PI;
+  p->facing = p->facing_target = M_PI;
   p->stagger = p->fallen = p->hit_flash = p->brace_flash = 0.0f;
   p->push_cooldown = p->push_flash = p->push_charge = 0.0f;
   p->push_held = false;
@@ -631,7 +751,7 @@ hz_internal void arena_reset_bodies(ArenaChar **by_role) {
     q->revenge = false;
     q->revenge_delay = 0.0f;
     q->attack_cooldown = role == ARENA_ROLE_AGGRESSIVE ? 1.5f : 0.0f;
-    q->facing = arena_face_toward(q->x, q->z, p->x, p->z);
+    q->facing = q->facing_target = arena_face_toward(q->x, q->z, p->x, p->z);
   }
 }
 
@@ -728,7 +848,7 @@ ecs_system(arena_step_system, EcsInOut(ArenaChar), EcsResInOut(ArenaGameState), 
   f32 wz = mx * -sh + mz * -ch;
   f32 speed = ARENA_MOVE_SPEED * (p->fallen > 0.0f ? 0.0f : (p->stagger > 0.0f ? 0.35f : 1.0f)) * (p->push_held ? 0.7f : 1.0f);
   if (p->fallen <= 0.0f && in_len > 0.05f)
-    p->facing = m_atan2f(wx, wz);
+    p->facing_target = m_atan2f(wx, wz);
   p->x += (wx * speed + p->vx) * step;
   p->z += (wz * speed + p->vz) * step;
   p->vx *= m_expf(-ARENA_FRICTION * step);
@@ -740,7 +860,7 @@ ecs_system(arena_step_system, EcsInOut(ArenaChar), EcsResInOut(ArenaGameState), 
     if (role == ARENA_ROLE_FILMER) {
       q->vx = 0.0f;
       q->vz = 0.0f;
-      q->facing = m_atan2f(p->x - q->x, p->z - q->z);
+      q->facing_target = m_atan2f(p->x - q->x, p->z - q->z);
       continue;
     }
     b32 hostile = role == ARENA_ROLE_AGGRESSIVE || q->revenge;
@@ -752,7 +872,7 @@ ecs_system(arena_step_system, EcsInOut(ArenaChar), EcsResInOut(ArenaGameState), 
         f32 fdx = p->x - q->x;
         f32 fdz = p->z - q->z;
         if (arena_len(fdx, fdz) > 0.001f)
-          q->facing = m_atan2f(fdx, fdz);
+          q->facing_target = m_atan2f(fdx, fdz);
       }
     } else if (hostile) {
       if (g->has_incoming && g->attacker_role == role) {
@@ -764,7 +884,7 @@ ecs_system(arena_step_system, EcsInOut(ArenaChar), EcsResInOut(ArenaGameState), 
         f32 distance = arena_len(dx, dz);
         f32 nx = distance > 0.0001f ? dx / distance : 0.0f;
         f32 nz = distance > 0.0001f ? dz / distance : 1.0f;
-        q->facing = m_atan2f(nx, nz);
+        q->facing_target = m_atan2f(nx, nz);
         if (distance > ARENA_AGGRESSIVE_RANGE) {
           f32 k = m_minf(1.0f, step * 8.0f);
           q->vx += (nx * ARENA_AGGRESSIVE_SPEED - q->vx) * k;
@@ -795,7 +915,7 @@ ecs_system(arena_step_system, EcsInOut(ArenaChar), EcsResInOut(ArenaGameState), 
       f32 fdx = p->x - q->x;
       f32 fdz = p->z - q->z;
       if (arena_len(fdx, fdz) > 0.001f)
-        q->facing = m_atan2f(fdx, fdz);
+        q->facing_target = m_atan2f(fdx, fdz);
     }
 
     q->x += q->vx * step;
@@ -820,6 +940,14 @@ ecs_system(arena_step_system, EcsInOut(ArenaChar), EcsResInOut(ArenaGameState), 
   for (i32 i = 0; i < it->count; i++) {
     ArenaChar *c = ecs_sys_get_component_mut(ArenaChar, i);
     arena_clamp_one(&c->x, &c->z);
+    // turn toward the steering yaw at a human rate instead of snapping
+    f32 turn = c->facing_target - c->facing;
+    while (turn > M_PI)
+      turn -= 2.0f * (f32)M_PI;
+    while (turn < -(f32)M_PI)
+      turn += 2.0f * (f32)M_PI;
+    f32 max_turn = ARENA_TURN_RATE * step;
+    c->facing += m_minf(max_turn, m_maxf(-max_turn, turn));
     ecs_component_set(it->world, it->entities[i], LocalTransform,
                       {.position = {c->x, 0.0f, c->z},
                        .rotation = quat_rotate_y(c->facing),
@@ -872,6 +1000,7 @@ hz_internal void game_sim_init(GameSim *sim, EcsWorld *w, AssetSystem *assets, A
   physics.gravity = (v3){0, -GAME_GRAVITY, 0};
   ecs_rigidbody_init(w, &(EcsRigidBodyInitDesc){.settings = physics});
   ecs_physics_init(w, physics.collision_layer_settings);
+  ecs_ik_init(w); // foot plant + gaze on the avatars; must precede the frame's ik schedules
   character_controller_init(w);
   camera_rig_init(w);
   sim->sim_clock = fixed_timestep_make(GAME_FIXED_HZ, GAME_MAX_SUBSTEPS);
@@ -1034,6 +1163,8 @@ typedef struct AppState {
   b32 touch_jump_held;
   b32 editor_open;
   b32 look_locked;
+  i32 crowd_wanted;  // arena_crowd stress ring: target count
+  i32 crowd_spawned; // streamed in a few per frame (the spawn queue cannot absorb 150 at once)
 #if GAME_DEV_TOOLS
   EcsEditorDefault editor;
 #endif
@@ -1080,6 +1211,53 @@ hz_internal void arena_cmd_cam(const HzCommandCtx *ctx, void *user) {
   hz_command_set_summary(ctx, "follow close-up camera on");
 }
 
+// "arena_crowd:<n>" — n extra walk-in-place commuters in a ring (50-char skin/draw stress test).
+// Engine-driven EcsAnimationRef: the retargeted clips cover the palette 1:1 so no remap is needed,
+// and no IK/faces budget is spent on background bodies (the real game's crowd policy).
+// Spawns stream in a few per frame: one flush cannot absorb 150 deferred entity spawns.
+hz_internal void arena_spawn_crowd_one(EcsWorld *w, AssetSystem *assets, i32 i) {
+  static const char *models[] = {"arena_commuter/female_commuter.glb", "arena_commuter/male_casual.glb",
+                                 "arena_commuter/male_hoodie.glb", "arena_commuter/female_hijab.glb"};
+  HzHandleT(AnimationBlobAsset) walk = asset_load(AnimationBlobAsset, assets, .path = "arena_retarget_male/actions/Walk_Loop.hza");
+  f32 ang = (f32)i * 2.399963f; // golden angle: no clumping
+  f32 rad = 6.5f + (f32)(i % 7) * 0.45f;
+  v3 at = {m_sinf(ang) * rad, 0.0f, m_cosf(ang) * rad};
+  quat yaw = quat_axis_angle(V3_UP, ang + (f32)M_PI * 0.5f);
+  EcsEntity e = ecs_entity_create(w);
+  ecs_component_set(w, e, LocalTransform, {.position = at, .rotation = yaw, .scale = V3_ONE});
+  ecs_component_set(w, e, WorldTransform, {.position = at, .rotation = yaw, .scale = V3_ONE});
+  EcsEntity av = ecs_entity_create(w);
+  ecs_component_set(w, av, EcsParent, {.parent = e});
+  ecs_component_set(w, av, LocalTransform, {.position = V3_ZERO, .rotation = quat_identity(), .scale = V3_ONE});
+  ecs_component_set(w, av, EcsModelRef,
+                    {.model = blob_asset_ref_from_handle(ModelBlobAsset, asset_load(ModelBlobAsset, assets, .path = models[i % 4]))});
+  ecs_component_set(w, av, EcsAnimationRef, {.animation = blob_asset_ref_from_handle(AnimationBlobAsset, walk)});
+  ecs_component_set(w, av, EcsVisibility, {.visible = true, .casts_shadow = false});
+  EcsEntity disc = ecs_entity_create(w);
+  ecs_component_set(w, disc, EcsParent, {.parent = e});
+  ecs_component_set(w, disc, LocalTransform,
+                    {.position = {0.0f, 0.03f, 0.0f},
+                     .rotation = quat_axis_angle((v3){1.0f, 0.0f, 0.0f}, -(f32)M_PI * 0.5f),
+                     .scale = (v3){1.24f, 1.24f, 1.0f}});
+  ecs_component_set(w, disc, EcsModelRef,
+                    {.model = blob_asset_ref_from_handle(ModelBlobAsset, asset_load(ModelBlobAsset, assets, .path = "engine/primitives/plane/plane.hza"))});
+  ecs_component_set(w, disc, EcsMaterial,
+                    {.material = blob_asset_ref_from_handle(MaterialBlobAsset, asset_load(MaterialBlobAsset, assets, .path = "arena/blob_soft_mat.hzt"))});
+  ecs_component_set(w, disc, EcsVisibility, {.visible = true, .casts_shadow = false});
+}
+
+hz_internal void arena_cmd_crowd(const HzCommandCtx *ctx, void *user) {
+  AppState *s = user;
+  i32 n = 0;
+  if (!cstr_to_i32(ctx->args, &n) || n < 0 || n > 200) {
+    hz_command_fail(ctx, "usage: arena_crowd:<n 0..200>");
+    return;
+  }
+  s->crowd_wanted = n;
+  s->crowd_spawned = 0;
+  hz_command_set_summary(ctx, "crowd ring spawning");
+}
+
 HZ_APP_API void app_init(AppMemory *memory) {
   // app_init runs on every lane; world setup is main-lane work
   if (!is_main_thread())
@@ -1093,7 +1271,11 @@ HZ_APP_API void app_init(AppMemory *memory) {
   // ---- engine modules the app adds to the simulation's: delete the ones your game does not use ----
   ecs_input_init(w);
   ecs_assets_init(w, NULL);
-  ecs_renderer_init(w, &(RendererInitDesc){.shadows_enabled = true, .bloom_enabled = true});
+  ecs_renderer_init(w, &(RendererInitDesc){.shadows_enabled = true,
+                                           .bloom_enabled = true,
+                                           // 62 joints per commuter: the 1024 default caps the scene at ~16 skinned bodies
+                                           .max_bones = 4096,
+                                           .max_skinned_model_instances = 160});
   // the hardware's quality level: without one every feature keeps its highest default
   RendererHardware hw = renderer_hardware(ecs_resource_get(w, RendererState));
   renderer_set_quality(ecs_resource_get_mut(w, RendererState), renderer_quality_for_hardware(&hw));
@@ -1136,6 +1318,7 @@ HZ_APP_API void app_init(AppMemory *memory) {
   // verification commands (hz-build --commands): pin a pose, put the debug camera in front of the player
   hz_command_register("arena_force", arena_cmd_force, s);
   hz_command_register("arena_cam", arena_cmd_cam, s);
+  hz_command_register("arena_crowd", arena_cmd_crowd, s);
 
   log_info("starting template initialized");
 }
@@ -1334,13 +1517,22 @@ HZ_APP_API void app_update_and_render(AppMemory *memory) {
     // the editor pauses the simulation
     game_sim_begin_frame(&s->sim, &controls, dt, s->editor_open);
   }
+  if (is_main_thread() && s->crowd_spawned < s->crowd_wanted) {
+    // stream the stress ring in: 6 spawns per frame keeps the deferred spawn queue well under its cap
+    AssetSystem *assets = ecs_resource_get_mut(w, AssetSystem);
+    for (i32 k = 0; k < 6 && s->crowd_spawned < s->crowd_wanted; k++)
+      arena_spawn_crowd_one(w, assets, s->crowd_spawned++);
+  }
   lane_sync(); // publishes the main-lane writes above to every lane
 
   // ALL lanes enter the scope. Never call is_main_thread() in here: schedule systems instead.
   ecs_scope(w) {
     day_night_schedule(w); // turns the Sun, sets the light, ambient and fog
     game_sim_schedule(&s->sim, dt);
-    ecs_renderer_schedule(w);
+    ecs_ik_resolve_schedule(w);
+    ecs_renderer_schedule_pose(w); // clips -> joint_poses
+    ecs_ik_schedule(w);            // foot plant + gaze edit the poses BEFORE skinning
+    ecs_renderer_schedule_skin(w); // joint_poses -> bone matrices
     ecs_flush(w, dt);
   }
 

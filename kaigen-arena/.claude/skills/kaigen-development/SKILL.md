@@ -118,6 +118,27 @@ then fire phantom one-shots (a punch or get-up triggers on reset).
 Fix: store the previous timestamp per entity/resource and skip edges when
 `now < prev` (time went backwards), then update `prev`.
 
+### Quaternius Ultimate Modular rigs hang the feet off Root
+Symptom: `ik_chain_build: joint N is not below joint M — chain cannot be closed` / `ecs_ik: leg chain UpperLeg.L -> Foot.L could not be built`. Cause: the pack exports `Foot.L/R` (and the zero-weight `PT.L/R`) as children of `Root`, not `LowerLeg`, so hip→knee→ankle is not a real chain (IK and foot planting silently drop the legs). Fix: `scripts/fix_leg_hierarchy.py` reparents `Foot.*` under `LowerLeg.*` preserving world transforms; run it AFTER `import_quaternius_pack.py` and BEFORE `retarget_clips.py` (the retarget bakes locals over the target hierarchy). `PT.*` carry zero skin weight — leave them out of `ball_joint`.
+
+### `max_bones` default 1024 caps skinned characters at ~16
+Symptom: BREAKPOINT in `renderer_model_instantiate` once ~18+ skinned bodies exist (a 50-char crowd dies; 12 chars pass). Cause: `RendererInitDesc.max_bones` defaults to 1024; a Quaternius commuter needs 62 joints → ~16 instances before the bone palette asserts. Fix: budget `max_bones = joints × chars + margin` at `ecs_renderer_init` (4096 covers 50+ commuters) and raise `max_skinned_model_instances` to match.
+
+### One flush cannot absorb a mass entity spawn
+Symptom: crash in `ecs_spawn_block`/`mcr_queue_process`/`renderer_model_instantiate` when a command creates 25+ entities (3 each: body/vis/shadow) in one go. Cause: the deferred spawn queue has a fixed cap per flush. Fix: stream spawns — keep a target/spawned counter and create a handful per frame from the main lane (see `arena_spawn_crowd_one` in starting_template.c). 6/frame streams 50 chars cleanly.
+
+### Texture sidecar `image` paths with extensions do not resolve
+Symptom: `texture dep: no image found for /dir/name.png` then `Failed to decode texture`, even though `assets/dir/name.png` exists. Cause: the exporter's `image` lookup wants the extension-LESS path (it probes extensions), matching `KaigenBot_BaseColor.hzt` (`image "/.../KaigenBot_BaseColor"`). Fix: write `image "/dir/name" u8` in the `.hzt` and keep the `.png` on disk; confirm the cook emits `cooked/.../name_bc7.ktx`.
+
+### Transparent material renders opaque without `HZ_RENDERER_TRANSPARENT` keyword
+Symptom: an `is_transparent true` + alpha-blend material draws as a solid hard-edged quad; no texture fade, no warnings in the log. Cause: `is_transparent` only sets the pipeline blend state — the shader's `out_a = mat.color.a * albedo.a` path is compiled per keyword variant, and `HZ_RENDERER_TRANSPARENT` must be listed explicitly in the material's `keywords` (see `hz/assets/engine/renderer/glass_taa.hzt`). Fix: add the keyword; without it the variant takes the opaque `out_a = 1.0` branch.
+
+### Face features on Quaternius heads: the head mesh includes the neck
+Symptom: a mouth placed at "22% up the head mesh" lands on the throat as a floating ball. Cause: the `Skin` head primitive's y-range spans skull AND neck (e.g. 1.54-1.79), so its bottom is the neck base, not the chin. Fix: place the mouth at ~40% of the mesh height (eyes at ~62% read correctly); verify with a head close-up (`arena_cam` 2.6 m).
+
+### First INERTIALIZE play logs "history not ready" and snaps
+Symptom: `animation_layer: INERTIALIZE requested but history not ready (call animation_layer_ensure_buffers, then evaluate at least once); snapping instead`. Cause: inertialization needs one evaluated pose of history before it can blend. Fix: harmless (the first clip always snaps), but call `animation_layer_ensure_buffers(layer, joint_count)` at avatar setup so the SECOND transition already has history.
+
 ## Visual verification harness (build one early)
 
 Do not verify gameplay by reading code or logs alone. The engine's `--commands`
